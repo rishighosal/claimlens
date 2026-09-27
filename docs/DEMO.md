@@ -12,18 +12,23 @@ python scripts/replay_eval.py --sample 70      # produces the "Does memory help?
 uvicorn claimlens.api:app --app-dir backend --port 8000
 ```
 
+- Clear the browser's local storage for the app (or use an incognito window) so it opens on **The problem** and the guided demo starts at 0/6.
 - Open the app, click **Playbook** in the memory panel, and hit **Refresh** so the mental model is built before judges see it.
 - Pre-run `Investigate` once on a throwaway claim to warm up the API connection. Then `POST /api/admin/reset-ui` (or delete `data/state.json`) so the queue looks fresh.
 - Browser zoom 110%, close other tabs, notifications off.
 
 ## The 3-minute flow
 
+**Open on "The problem" screen.** It appears first on a fresh browser, and the header tab brings it back. Read the headline, click **Reveal what memory sees** and let the five lines appear (≈30 s), then click **Start the guided demo**. The purple strip at the top of the workbench walks through the same steps as the table below; each **Go** button opens the right claim.
+
+Talk track, deck and judge Q&A: [PITCH.md](PITCH.md).
+
 | Time | Screen | Say |
 |---|---|---|
 | 0:00 | Queue | "I'm an SIU analyst at a Hyderabad insurer. 26 claims came in this September. Organised fraud never looks suspicious on one claim; it only shows up across history. ClaimLens gives the triage agent that history, using Hindsight as memory." |
 | 0:20 | **#10595** (Sri Balaji Auto Works, K. Venkat Rao). Click **Investigate with memory** | "Same model, same prompt, run twice. Watch the memory panel on the right: it's asking Hindsight about the phone, the bank account, the surveyor, the story…" |
 | 0:40 | Compare cards | "Without memory: fast-track. A hit-and-run at night, no FIR. Happens every day. With memory: refer to SIU." |
-| 0:55 | Red flags + evidence graph | "Here's why, and every point cites a claim ID. The claimant's phone matches #10572, which SIU repudiated in August. The payee bank account matches #10566, repudiated in July. The same surveyor, K. Venkat Rao, handled every one of them, and the story is almost word-for-word what other claimants told us. Red boxes are past claims we confirmed as fraud." Hover the shared-phone node. |
+| 0:55 | Red flags + evidence graph | "Here's why, and every point cites a claim ID. The claimant's phone matches #10572 and his payee bank account matches #10566. Investigators repudiated both as fraud on 7 and 8 September. The same surveyor, K. Venkat Rao, handled every one of them, and the story is almost word-for-word what other claimants told us. Red boxes are past claims we confirmed as fraud." Hover the shared-phone node. |
 | 1:20 | Type findings, click **Confirm fraud** | "I record the outcome. That's a Hindsight retain: memory just learned something." |
 | 1:30 | **#10606** (next R1 claim) → Investigate | "Nine days later, same ring. Now it links straight to the claim I closed a minute ago." Point at #10595 in the evidence. **This is the learning moment.** |
 | 1:50 | **#10614** (Sri Balaji garage, surveyor T. Lavanya) → Investigate | "Same garage, but a different surveyor, and the other driver's registration is on record. Memory knows six genuine claims at this garage, all with other surveyors, were paid without issue. It doesn't over-flag. Volume isn't fraud; that's one of the bank's directives." |

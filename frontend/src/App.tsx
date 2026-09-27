@@ -6,6 +6,7 @@ import { Drawer } from "./components/Drawer";
 import { EvalView } from "./components/EvalView";
 import { MemoryPanel } from "./components/MemoryPanel";
 import { Queue } from "./components/Queue";
+import { Story } from "./components/Story";
 import { Tour } from "./components/Tour";
 
 const store = {
@@ -26,7 +27,14 @@ const store = {
 };
 
 export default function App() {
-  const [view, setView] = useState<"work" | "eval">("work");
+  // First visit opens on the problem story; after that, straight to the workbench.
+  const [view, setViewRaw] = useState<"story" | "work" | "eval">(
+    store.get("cl.storySeen", "0") === "1" ? "work" : "story",
+  );
+  const setView = (v: "story" | "work" | "eval") => {
+    if (v !== "story") store.set("cl.storySeen", "1");
+    setViewRaw(v);
+  };
   const [scope, setScope] = useState<"queue" | "history">("queue");
   const [rows, setRows] = useState<Row[]>([]);
   const [sel, setSel] = useState<string | null>(null);
@@ -79,6 +87,7 @@ export default function App() {
           <span className="tagline">claims triage that remembers every claim</span>
         </div>
         <nav className="views">
+          <button className={view === "story" ? "on" : ""} onClick={() => setView("story")}>The problem</button>
           <button className={view === "work" ? "on" : ""} onClick={() => setView("work")}>Investigate</button>
           <button className={view === "eval" ? "on" : ""} onClick={showEval}>Does memory help?</button>
           {!tourShown && (
@@ -107,7 +116,18 @@ export default function App() {
         </div>
       )}
       {err && <div className="banner error">{err}</div>}
-      {view === "eval" ? (
+      {view === "story" ? (
+        <main className="story-main">
+          <Story
+            onStart={() => {
+              setTourShown(true);
+              store.set("cl.tour", "1");
+              go("CLM-2026-10595");
+            }}
+            onEval={showEval}
+          />
+        </main>
+      ) : view === "eval" ? (
         <main className="eval-main">
           <EvalView />
         </main>

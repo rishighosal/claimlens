@@ -4,18 +4,19 @@ Length ~3:00. Screen recording + face cam if possible, 1080p, font zoom 110–12
 
 ## Script
 
-**[0:00–0:30] Intro (face cam, then app)**
-"Hi, I'm [NAME]. We built ClaimLens, a claims triage agent for insurance fraud investigators that remembers every claim it has ever seen. Fraud rings are invisible if you look at one claim at a time. They only show up across history, so we gave the agent a memory: Hindsight."
-*On screen: app with the September queue.*
+**[0:00–0:35] The problem (face cam for 5 s, then the app's "The problem" screen)**
+"Hi, I'm [NAME]. This is ClaimLens. Here are three insurance claims: Priya, Sneha and Suresh. Different people, different cars, all routine hit-and-runs. An AI that reads one claim at a time would pay all three. Watch what memory sees."
+*On screen: click **Reveal what memory sees**. Let the lines appear: same phone, same bank account, same surveyor, same story, and two of them already repudiated as fraud.*
+"None of that is in Suresh's claim. It's in the history. Insurers lose eight to ten thousand crore a year to fraud like this."
 
-**[0:30–1:00] The problem: an agent without memory**
-"Here's a claim. A Creta, rear-ended at night by a vehicle that drove off, ₹82,400. I'll investigate it. On the left is the same model with no history. It says fast-track: looks normal, pay it."
-*On screen: #10595, click Investigate, point at the grey 'Without memory' card.*
+**[0:35–1:00] The same claim, without and with memory**
+"So we gave the claims agent a memory: Hindsight. Same model, same prompt, run twice."
+*Click **Start the guided demo**, then **Investigate with memory** on #10595. Point at the grey 'Without memory' card: fast-track.*
 
 **[1:00–2:30] The demo: retain and recall live**
 "On the right, the same model and prompt, with Hindsight. Refer to SIU. Watch the memory panel: it ran a separate recall for the phone, the bank account, the surveyor and the story."
 *Point at Live activity: the RECALL rows and their tags.*
-"The phone matches a claim investigators repudiated in August. The bank account matches one from July. Same surveyor on all of them. Every red flag cites a claim ID, and this graph shows the ring."
+"The phone matches one claim investigators just repudiated as fraud, and the bank account matches another. Same surveyor on all of them. Every red flag cites a claim ID, and this graph shows the ring."
 *Hover shared-phone node.*
 "I'll confirm fraud. That's a retain; memory just learned it. Next claim from the same ring, nine days later: it now cites the claim I just closed."
 *Confirm fraud → open #10606 → Investigate → point at #10595 in evidence.*

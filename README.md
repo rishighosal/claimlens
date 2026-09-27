@@ -120,7 +120,7 @@ pip install -r requirements.txt
 python scripts/check_llm.py       # confirms which models your key can use
 python scripts/seed_memory.py     # configure the bank + load Jan–Aug history (~6 min)
 uvicorn claimlens.api:app --app-dir backend --port 8000
-# open http://localhost:8000
+# open http://localhost:8000: it opens on "The problem", then a guided demo
 ```
 
 Offline UI development without keys: `CLAIMLENS_FAKE_MEMORY=1 CLAIMLENS_FAKE_LLM=1 uvicorn ...`. This uses naive in-process stand-ins, clearly bannered in the UI, not Hindsight.
@@ -147,7 +147,7 @@ backend/claimlens/
   api.py           FastAPI routes + static UI
 scripts/           generate_data · seed_memory · replay_eval · check_llm
 frontend/src/      React + TypeScript UI (no UI libraries)
-docs/              HINDSIGHT.md · DEMO.md · architecture diagram
+docs/              HINDSIGHT.md · DEMO.md · PITCH.md (talk track + judge Q&A) · ClaimLens-pitch.pptx · architecture
 tests/             pytest suite
 ```
 
