@@ -2,55 +2,82 @@
 
 **Claims triage that remembers every claim it has ever seen.**
 
-Organised insurance fraud is invisible one claim at a time. A staged rear-end collision at a Moosapet garage looks exactly like a genuine one, until you notice that the same surveyor approved five others like it, two "unrelated" claimants share a phone number, and the story is word-for-word what someone else told us in March.
+[![tests](https://github.com/rishighosal/claimlens/actions/workflows/ci.yml/badge.svg)](https://github.com/rishighosal/claimlens/actions/workflows/ci.yml)
+![memory](https://img.shields.io/badge/memory-Hindsight-6d28d9)
+![llm](https://img.shields.io/badge/LLM-gpt--oss--120b%20on%20Groq-374151)
+![license](https://img.shields.io/badge/license-MIT-15803d)
 
-Claims handlers can't hold nine months of history in their heads, and a normal LLM triage bot starts from zero on every claim. ClaimLens is a fraud-triage agent for an insurer's Special Investigation Unit (SIU) that uses [Hindsight](https://github.com/vectorize-io/hindsight) as its institutional memory. Every claim and every investigator outcome goes into memory. Every new claim is checked against all of it.
+<!-- DEMO-VIDEO: replace this comment with:  **[▶ Watch the 3-minute demo](https://youtu.be/...)** -->
 
+Organised insurance fraud is invisible one claim at a time. A staged "unknown vehicle hit me from behind" at a Moosapet garage looks exactly like a genuine accident. It stops looking genuine once you notice that the same surveyor handled ten others like it, two "unrelated" claimants share a phone number, and the payee bank account is on a claim that investigators already repudiated.
 
-## What it does
+A normal LLM triage bot starts from zero on every claim. ClaimLens is a fraud-triage agent for an insurer's Special Investigation Unit (SIU) that uses **[Hindsight](https://github.com/vectorize-io/hindsight) as its institutional memory**. Every claim and every investigator outcome goes into memory, and every new claim is checked against all of it.
 
-1. **Intake:** a new claim arrives: motor or health, with the claimant, phone, bank account, vehicle, garage, surveyor, hospital, doctor and agent.
-2. **Investigate:** ClaimLens asks Hindsight ~10 targeted questions in parallel ("who else used this phone?", "have we heard this story before?", "what did SIU conclude about this surveyor?") and folds the answers into an evidence graph of linked past claims.
-3. **Assess twice:** the same model and prompt score the claim **without memory** and **with memory**, side by side. The only difference is Hindsight.
-4. **Explain:** every red flag cites the past claim IDs it rests on. Citations the model invents are stripped.
-5. **Learn:** when an investigator records an outcome (approved, cleared, referred, fraud confirmed), it is retained. The next claim touching the same people, providers or story is judged with it. A Hindsight mental model, the *SIU fraud playbook*, rewrites itself as outcomes accumulate.
+## Result: same model, same prompt; the only difference is memory
 
-## Why memory is the product (what the demo claims show)
+![Fraud claims flagged per month, with and without Hindsight memory](data/eval/learning_curve.png)
 
-| | Stateless LLM | ClaimLens + Hindsight |
+| Replay of 9 months of claims, in date order | Without memory | With Hindsight |
 |---|---|---|
-| Staged "unknown vehicle hit me from behind" claim | Plausible, no FIR needed for hit-and-run. **Fast-track.** | 3 earlier claims with the same surveyor; claimant's phone matches a claim SIU repudiated in August; narrative near-identical to 4 others. **Refer to SIU.** |
-| Busy authorised dealer with 16 claims | n/a | Recognises the volume as normal; investigators cleared them all. **Not flagged.** |
-| Same Creta, same front-left damage, new owner | Nothing unusual | Vehicle claimed identical damage in Feb and June. **Refer.** |
+| Fraud claims flagged, Aug–Sep | 0 / 12 | **11 / 12** |
+| Fraud claims flagged, whole year | 0 / 33 | 14 / 33 |
+| Genuine claims wrongly flagged | 0 | **0** |
+| Fraud value flagged | ₹0 | **₹36.7 lakh** |
 
-The dataset has decoys on purpose (a high-volume but clean dealer, genuine claims at the fraud garage handled by other surveyors), so the agent has to learn *combinations*, not just "this garage is bad".
+The agent **learns**. It catches nothing while a ring is new and nothing is confirmed (March–June), which is correct. Once investigators confirm the first cases in July, Hindsight recalls those outcomes and the agent catches the rest of the ring: **43% → 100% → 86%**, without flagging a single honest claim. [How the replay works ↓](#does-memory-actually-help-replay-evaluation)
+
+## Why it matters
+
+- Indian insurers lose an estimated **₹8,000–10,000 crore a year**, 8–10% of claim payouts, to fraud, waste and abuse ([BCG × Medi Assist, Nov 2025](https://www.business-standard.com/industry/news/insurance-fwa-drains-rs10000cr-each-year-bcg-mediassist-report-125112101199_1.html)).
+- **IRDAI's Insurance Fraud Monitoring Framework Guidelines, 2025** (in force from 1 April 2026) require every insurer to run a Fraud Monitoring Unit, maintain red-flag indicators and an incident database, and share fraud data with the IIB caution repository ([summary](https://taxguru.in/corporate-law/irdai-insurance-fraud-monitoring-framework-guidelines-2025.html)).
+- Rings are exactly what per-claim rules and stateless models miss. The evidence isn't in any one file; it's in the history. ClaimLens is the memory a Fraud Monitoring Unit needs: it connects a new claim to every person, provider, story and verdict the unit has already seen, and it gets better with every case the unit closes.
+
+## What it looks like on real claims (live run, `gpt-oss-120b`)
+
+| Claim | Without memory | With Hindsight | Why |
+|---|---|---|---|
+| #10595: night-time hit-and-run, Sri Balaji Auto Works | 15 · Fast-track | **87 · Refer to SIU** | Payee account is on #10566 and phone is on #10572, both repudiated by SIU; same surveyor as the confirmed ring claims |
+| #10606: same ring, 9 days later, *after* #10595 was confirmed in the UI | 15 · Fast-track | **85 · Refer to SIU** | Evidence now includes #10595, the case closed a minute earlier. One retain call, no retraining. |
+| #10614: *honest* claim at the ring's own garage, different surveyor | 15 · Fast-track | **22 · Fast-track** | Shares only the garage; no personal identifier. Graded WEAK, correctly not flagged. |
+| #10597: Creta TS08FK4521, same front-left damage, new owner | 15 · Fast-track | **75 · Refer to SIU** | Same vehicle claimed identical damage in February and June under other policies |
+
+## What's new here
+
+1. **Outcomes are memories.** Investigator decisions are retained as their own dated documents with the same entity tags as the claim. That's what turns recall into *learning*: the agent is judged against what turned out to be true, not just what people said.
+2. **Memory as investigator questions.** Each claim gets 15–17 targeted recalls, run in parallel: *who else has this phone / account / vehicle / address / surveyor…*, *what did SIU decide about them*, *have we heard this story before*, *what happened around this time*, *which patterns match*.
+3. **Evidence is graded before the model sees it.** Every recalled link is labelled STRONG (a shared personal identifier, or the same surveyor/doctor as *confirmed* fraud) or WEAK (only a shared garage or a similar story). That's why the honest claim at the fraud garage stays at 22.
+4. **Measured, not claimed.** A leak-free replay ablation compares the same model with and without memory, and measures the learning curve.
+5. **Rules of evidence live in the memory bank.** Hindsight directives: a pattern is a lead, not proof; cite claim IDs; volume is not fraud; respect cleared cases. Any claim ID the model cites that memory didn't return is stripped.
+
+## Architecture
+
+![ClaimLens architecture: claims and outcomes retained into Hindsight; 15–17 recalls per claim; STRONG/WEAK grading; two-arm scoring; reflect for briefings](docs/img/architecture.png)
 
 ## How Hindsight is used
 
-All of it lives in [`backend/claimlens/memory.py`](backend/claimlens/memory.py).
+Full write-up: **[docs/HINDSIGHT.md](docs/HINDSIGHT.md)**. Code: [`backend/claimlens/memory.py`](backend/claimlens/memory.py).
 
 | Hindsight feature | How ClaimLens uses it |
 |---|---|
-| **retain** with `document_id`, `timestamp`, `entities`, `tags`, `metadata` | Each claim is retained at intake (timestamp = intimation date). Each investigator outcome is retained as its own document at the date it was decided. Hard identifiers (phone, payee account, vehicle, address, garage, surveyor, hospital, doctor, agent) are passed as typed **entities** *and* as **tags**. |
-| **recall** with `tags` + `tags_match="any_strict"` | Exact linking: one recall per identifier ("every memory tagged `phone:9848…`"). This is how two claimants who never met turn out to share a bank account. |
-| **recall** (semantic + keyword + graph arms, reranked) with `min_scores={"reranker": …}` | "Have we heard this story before?" Finds templated narratives across different people, with a relevance floor so weak matches don't become links. |
-| **recall** with `temporal_window` + `query_timestamp` | "What happened around this time?" Bursts of similar claims before the intimation date. |
-| **recall** with `types=["observation"]` | Pulls Hindsight's auto-consolidated observations: patterns it has merged across many claims. |
-| **reflect** with mission + **directives** + disposition | Writes the investigator briefing and answers free-form questions ("What do the Lifeline claims have in common?"). Directives encode SIU rules of evidence: *a pattern is a lead, not proof*; *cite claim IDs*; *volume is not fraud*; *respect cleared outcomes*. Disposition: skepticism 4, literalism 4, empathy 2. |
-| **mental model** (`refresh_after_consolidation`) | The *SIU fraud playbook*: a living summary of confirmed modus operandi and cleared look-alikes. Nobody writes it; it rebuilds as outcomes arrive. |
+| **retain** with `document_id`, `timestamp`, `entities`, `tags`, `metadata` | Each claim is retained at intake (timestamp = intimation date). Each investigator outcome is retained as its own `verdict:<claim>` document at the date it was decided. Hard identifiers (phone, payee account, vehicle, address, garage, surveyor, hospital, doctor, agent) are passed as typed **entities** *and* as **tags**. |
+| **recall**, `tags` + `tags_match="any_strict"` | Exact linking: one recall per identifier. This is how two claimants who never met turn out to share a bank account. |
+| **recall**, `tags=["verdict", <entity>]` + `all_strict` | "What did SIU decide about this surveyor / phone / vehicle?" Outcomes are fetched explicitly, so a fresh verdict is never crowded out. |
+| **recall**, semantic + keyword + graph arms, reranked, `min_scores={"reranker": 0.55}` | "Have we heard this story before?" Finds templated narratives across different people; the reranker floor stops weak matches from becoming links. |
+| **recall**, `temporal_window` + `query_timestamp` | "What happened around this time?" The replay anchors recall at the claim's date so memory never sees the future; the live app anchors at *now*, so today's verdicts count. |
+| **recall**, `types=["observation"]` | Hindsight's auto-consolidated observations: patterns merged across many claims. |
+| **reflect** with mission, **directives** and disposition | Investigator briefings and free-form questions ("What do the Lifeline claims have in common?"), under SIU rules of evidence. Disposition: skepticism 4, literalism 4, empathy 2. |
+| **mental model**, `refresh_after_consolidation` | The *SIU fraud playbook*: a living summary of confirmed modus operandi and cleared look-alikes. Nobody writes it; it rebuilds as outcomes arrive. |
 | **retain_mission / observations_mission** | Tells Hindsight what matters when extracting facts from claim files, and what to consolidate. |
 
 ## Does memory actually help? (replay evaluation)
 
-`scripts/replay_eval.py` replays nine months of claims **in date order** into a fresh bank. Each claim is scored with and without memory by the same model before it is retained. Investigator outcomes enter memory on the day they were decided, so memory never sees the future. Ground truth is used only for scoring.
+`scripts/replay_eval.py` replays all 215 claims **in date order** into a fresh bank. Before each claim is retained, it is scored twice by the same model with the same prompt: once alone, once with Hindsight recall. Investigator outcomes enter memory on the day they were decided, so memory never sees the future. The replay runs in strict mode: no deterministic fallback, and both arms always use the same model. Ground truth is used only for scoring.
 
 ```bash
-python scripts/replay_eval.py --sample 70
+python scripts/replay_eval.py --sample 70 --pace 10
 ```
 
-Outputs `data/eval/results.md`, `results.json` (shown in the app under **Does memory help?**) and `learning_curve.png`.
-
-**Results** (215 claims replayed, 70 scored: all 33 fraud + 37 random genuine; `openai/gpt-oss-120b` on Groq for both arms; flag = risk ≥ 61):
+**Results** (70 scored: all 33 fraud + 37 random genuine; `openai/gpt-oss-120b` on Groq; flag = risk ≥ 61). Full tables in [`data/eval/results.md`](data/eval/results.md).
 
 | | Without memory | With Hindsight |
 |---|---|---|
@@ -65,11 +92,14 @@ Outputs `data/eval/results.md`, `results.json` (shown in the app under **Does me
 | Fraud flagged with memory | 0% | 0% | 0% | 0% | 43% | 100% | 86% |
 | Fraud flagged without memory | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
 
-Early ring claims are missed on purpose: they were paid before anyone noticed, and "same garage, same surveyor, previous claims approved" is not evidence. Once investigators confirm the first cases (July), Hindsight recalls those outcomes and the agent catches the rest of the ring, without flagging a single genuine claim. The one systematic miss is the second recycled-vehicle claim (scored 45, "standard review"): with no confirmed fraud on that car yet, the agent escalates to review, not SIU.
+**Limitations, honestly.**
+- Early ring claims are missed by design. They were paid before anyone noticed, and "same garage, same surveyor, previous claims approved" is not evidence.
+- The recycled-vehicle repeats scored 45, "standard review" rather than "refer": with nothing confirmed about that car, the agent escalates to review, not SIU.
+- The data is synthetic (see below). A real deployment would replay the insurer's own closed claims the same way.
 
 ## Data
 
-`scripts/generate_data.py` builds a seeded, realistic dataset: 213 motor and health claims from Hyderabad, January to September 2026. Real areas, police stations, IFSC-style accounts and IDVs; invented people and businesses. Four fraud patterns are hidden inside:
+`scripts/generate_data.py` builds a seeded, realistic dataset: 215 motor and health claims from Hyderabad, January to September 2026. It uses real areas, police stations, IFSC-style accounts and IDVs, with invented people and businesses. Four fraud patterns are hidden inside, plus decoys: a high-volume but clean authorised dealer, and genuine claims at the fraud garage handled by other surveyors. The agent has to learn *combinations*, not "this garage is bad".
 
 | Ring | Pattern | Why one-claim review misses it |
 |---|---|---|
@@ -77,8 +107,6 @@ Early ring claims are missed on purpose: they were paid before anyone noticed, a
 | R2 | Hospital admission ring: 1–2 day weekend admissions on 5-week-old policies from one agent | Each admission is medically plausible |
 | R3 | Early-claim intermediary: old cars insured at high IDV, "stolen"/"burnt" within 3 weeks, one apartment block | Early claims happen; the address cluster doesn't show on one file |
 | R4 | Recycled damage: same vehicle, same damage, new owner | Different policy, different garage |
-
-Early claims in each ring were paid before anyone noticed, just like in real life. Memory has to connect them later.
 
 ## Run it
 
@@ -89,50 +117,40 @@ cp .env.example .env              # add HINDSIGHT_API_KEY and GROQ_API_KEY
 pip install -r requirements.txt
 (cd frontend && npm install && npm run build)
 
-python scripts/seed_memory.py     # configure the bank + load Jan-Aug history
+python scripts/check_llm.py       # confirms which models your key can use
+python scripts/seed_memory.py     # configure the bank + load Jan–Aug history (~6 min)
 uvicorn claimlens.api:app --app-dir backend --port 8000
 # open http://localhost:8000
 ```
 
-Offline UI development without keys: `CLAIMLENS_FAKE_MEMORY=1 CLAIMLENS_FAKE_LLM=1 uvicorn ...`. This uses naive in-process stand-ins (clearly bannered in the UI), not Hindsight.
+Offline UI development without keys: `CLAIMLENS_FAKE_MEMORY=1 CLAIMLENS_FAKE_LLM=1 uvicorn ...`. This uses naive in-process stand-ins, clearly bannered in the UI, not Hindsight.
 
-Tests: `pytest` (18 tests, no network). `tests/test_hindsight_contract.py` pushes every memory call through the real `hindsight-client` request models with only HTTP stubbed.
+**Tests:** `pytest` (22 tests, no network; run in CI on every push). `tests/test_hindsight_contract.py` pushes every memory call through the real `hindsight-client` request models with only HTTP stubbed.
 
-## Architecture
-
-```
-            ┌──────────────── React workbench ────────────────┐
-            │ queue · claim · with/without · evidence graph   │
-            │ outcome buttons · live memory activity · ask    │
-            └───────────────────────┬─────────────────────────┘
-                                    │ FastAPI
-┌───────────────────────────────────▼───────────────────────────────────┐
-│ Investigator agent (agent.py)                                         │
-│   plan_probes ─► 10× recall in parallel ─► link + rank ─► LLM (JSON)  │
-│                                   │                  ▲                 │
-│   same prompt, no history ────────┼──────────────────┘ (baseline)     │
-│   outcome ─► retain ──────────────┤                                    │
-└───────────────────────────────────┼───────────────────────────────────┘
-                                    ▼
-             Hindsight bank "claimlens-siu"
-             claims · outcomes · entities · tags · observations
-             mission · directives · disposition · SIU playbook mental model
-```
-
-Robustness: the model is asked for JSON (no function calling). Responses go through lenient parsing, rate limits waited out using `Retry-After`, missing models skipped, JSON mode switched off on retries, a chain of backup models, then a conservative link-analysis score that counts only shared personal identifiers and links to confirmed fraud. The replay evaluation runs in strict mode and never uses that fallback. The band is always derived from the score, and uncited claim IDs are removed. One failed recall probe never sinks an investigation.
+**Robustness:**
+- The model is asked for JSON; there's no function calling to break.
+- Responses go through lenient parsing.
+- Rate limits are waited out using `Retry-After`, and missing models are skipped.
+- JSON mode alternates off on retries, and a chain of backup models follows.
+- Last comes a conservative link-analysis score that counts only shared personal identifiers and links to confirmed fraud.
+- The band is always derived from the score, never taken from the model.
+- One failed recall probe never sinks an investigation.
 
 ## Repo map
 
 ```
 backend/claimlens/
-  memory.py        Hindsight bank setup, retain/recall/reflect, probes, op log
-  agent.py         investigator: evidence ranking, prompts, validation, graph
+  memory.py        Hindsight bank setup, retain/recall/reflect, 17 probes, op log
+  agent.py         investigator: STRONG/WEAK grading, prompts, validation, graph
   claims.py        claims system of record, rendering, entity extraction
-  llm.py           defensive OpenAI-compatible client
+  llm.py           defensive OpenAI-compatible client (rate limits, model chain)
   api.py           FastAPI routes + static UI
-scripts/           generate_data · seed_memory · replay_eval
+scripts/           generate_data · seed_memory · replay_eval · check_llm
 frontend/src/      React + TypeScript UI (no UI libraries)
+docs/              HINDSIGHT.md · DEMO.md · architecture diagram
 tests/             pytest suite
 ```
 
 ClaimLens recommends; people decide. It never repudiates a claim on its own.
+
+MIT licensed. Built with [Hindsight agent memory](https://github.com/vectorize-io/hindsight) by Vectorize.

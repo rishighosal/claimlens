@@ -91,6 +91,7 @@ export function ClaimView({
   const [notes, setNotes] = useState("");
   const [who, setWho] = useState("A. Srilatha (SIU)");
   const [saved, setSaved] = useState<string | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
 
   useEffect(() => {
     setD(null);
@@ -143,6 +144,9 @@ export function ClaimView({
   }
 
   async function decide(decision: string) {
+    if (saving) return; // one outcome write at a time; retain takes a few seconds
+    setSaving(decision);
+    setSaved(null);
     try {
       const r = await api.decide(id, decision, notes, who);
       setD((x) => (x ? { ...x, decision: r.verdict } : x));
@@ -151,6 +155,8 @@ export function ClaimView({
       onChanged();
     } catch (e: any) {
       setErr(e.message || String(e));
+    } finally {
+      setSaving(null);
     }
   }
 
@@ -330,11 +336,18 @@ export function ClaimView({
               />
             </div>
             <div className="decide-row">
-              <button className="btn ok" onClick={() => decide("approved")}>Approve</button>
-              <button className="btn" onClick={() => decide("cleared")}>Cleared after check</button>
-              <button className="btn warn" onClick={() => decide("referred")}>Refer to SIU</button>
-              <button className="btn danger" onClick={() => decide("fraud_confirmed")}>Confirm fraud</button>
+              {([
+                ["approved", "Approve", "ok"],
+                ["cleared", "Cleared after check", ""],
+                ["referred", "Refer to SIU", "warn"],
+                ["fraud_confirmed", "Confirm fraud", "danger"],
+              ] as const).map(([key, label, tone]) => (
+                <button key={key} className={`btn ${tone}`} disabled={!!saving} onClick={() => decide(key)}>
+                  {saving === key ? "Writing to Hindsight…" : label}
+                </button>
+              ))}
             </div>
+            {saving && <div className="saving">Retaining outcome in Hindsight memory…</div>}
             {saved && (
               <div className="saved">
                 Retained in Hindsight: <b>{decisionLabel[saved]}</b>. Memory will use this for the next claim.

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#15803d"/></marker>
+    <marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker>
+    <marker id="av" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6d28d9"/></marker>
+    <marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#374151"/></marker>
+  </defs>
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="40" y="52" font-size="30" font-weight="700" fill="#111827">ClaimLens architecture</text>
+  <text x="40" y="84" font-size="18" fill="#6b7280">Hindsight is the institutional memory: every claim and every investigator outcome goes in; every new claim is checked against all of it.</text>
+
+  <!-- New claim -->
+  <rect x="40" y="150" width="230" height="200" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="62" y="186" font-size="20" font-weight="700" fill="#111827">New claim</text>
+  <text x="62" y="216" font-size="15" fill="#374151">motor or health</text>
+  <text x="62" y="248" font-size="15" fill="#374151">claimant · phone</text>
+  <text x="62" y="272" font-size="15" fill="#374151">bank a/c · vehicle · address</text>
+  <text x="62" y="296" font-size="15" fill="#374151">garage · surveyor</text>
+  <text x="62" y="320" font-size="15" fill="#374151">hospital · doctor · agent</text>
+  <line x1="272" y1="250" x2="330" y2="250" stroke="#374151" stroke-width="2.5" marker-end="url(#ak)"/>
+
+  <!-- Agent -->
+  <rect x="335" y="120" width="720" height="320" rx="18" fill="#f5f7ff" stroke="#a5b4fc" stroke-width="2"/>
+  <text x="360" y="158" font-size="22" font-weight="700" fill="#1e1b4b">Investigator agent</text>
+  <text x="1030" y="158" font-size="14" fill="#6b7280" text-anchor="end">backend/claimlens/agent.py · memory.py</text>
+
+  <g font-size="15" fill="#1f2937">
+    <rect x="360" y="178" width="320" height="112" rx="12" fill="#fff" stroke="#c7d2fe"/>
+    <text x="378" y="206" font-weight="700" fill="#3730a3">1  Plan 17 memory probes</text>
+    <text x="378" y="232">“Who else has this phone / a/c / car…?”</text>
+    <text x="378" y="254">“What did SIU decide about them?”</text>
+    <text x="378" y="276">“Heard this story before?” · recent · patterns</text>
+
+    <rect x="710" y="178" width="320" height="112" rx="12" fill="#fff" stroke="#c7d2fe"/>
+    <text x="728" y="206" font-weight="700" fill="#3730a3">2  Link &amp; grade evidence</text>
+    <text x="728" y="232"><tspan fill="#b91c1c" font-weight="700">STRONG</tspan> shared phone / a/c / vehicle,</text>
+    <text x="728" y="254">   or same surveyor as confirmed fraud</text>
+    <text x="728" y="276"><tspan fill="#6b7280" font-weight="700">WEAK</tspan> only same garage / similar story</text>
+
+    <rect x="360" y="306" width="320" height="112" rx="12" fill="#fff" stroke="#c7d2fe"/>
+    <text x="378" y="334" font-weight="700" fill="#3730a3">3  Score twice, same model + prompt</text>
+    <text x="378" y="360">A: claim alone (stateless baseline)</text>
+    <text x="378" y="382">B: claim + graded memory evidence</text>
+    <text x="378" y="404" fill="#6b7280">gpt-oss-120b on Groq · JSON · retries</text>
+
+    <rect x="710" y="306" width="320" height="112" rx="12" fill="#fff" stroke="#c7d2fe"/>
+    <text x="728" y="334" font-weight="700" fill="#3730a3">4  Validate</text>
+    <text x="728" y="360">strip claim IDs memory didn't return</text>
+    <text x="728" y="382">band derived from score, never trusted</text>
+    <text x="728" y="404" fill="#6b7280">fallback: conservative link score</text>
+  </g>
+  <line x1="682" y1="234" x2="706" y2="234" stroke="#6366f1" stroke-width="2" marker-end="url(#ak)"/>
+  <line x1="870" y1="292" x2="560" y2="304" stroke="#6366f1" stroke-width="2" marker-end="url(#ak)"/>
+  <line x1="682" y1="362" x2="706" y2="362" stroke="#6366f1" stroke-width="2" marker-end="url(#ak)"/>
+
+  <!-- Workbench -->
+  <line x1="1057" y1="280" x2="1112" y2="280" stroke="#374151" stroke-width="2.5" marker-end="url(#ak)"/>
+  <rect x="1115" y="120" width="445" height="320" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="1140" y="158" font-size="22" font-weight="700" fill="#111827">Investigator workbench</text>
+  <g font-size="16" fill="#374151">
+    <text x="1140" y="196">• Without memory vs with memory, side by side</text>
+    <text x="1140" y="226">• Red flags citing past claim IDs</text>
+    <text x="1140" y="256">• Evidence graph of the ring</text>
+    <text x="1140" y="286">• Live log of every retain / recall</text>
+    <text x="1140" y="316">• Investigator briefing · Ask memory</text>
+    <text x="1140" y="346">• Outcome: approve · refer · <tspan fill="#b91c1c" font-weight="700">confirm fraud</tspan></text>
+  </g>
+  <text x="1140" y="410" font-size="14" fill="#6b7280">React + TypeScript · FastAPI</text>
+
+  <!-- Hindsight -->
+  <rect x="40" y="590" width="1520" height="270" rx="20" fill="#f6f2ff" stroke="#8b5cf6" stroke-width="2.5"/>
+  <text x="66" y="632" font-size="24" font-weight="700" fill="#4c1d95">Hindsight memory bank  ·  claimlens-siu</text>
+  <text x="1534" y="632" font-size="15" fill="#6d28d9" text-anchor="end">hindsight.vectorize.io</text>
+  <g font-size="15" fill="#1f2937">
+    <rect x="66" y="654" width="350" height="180" rx="12" fill="#fff" stroke="#ddd6fe"/>
+    <text x="84" y="682" font-weight="700" fill="#5b21b6">Claims (world facts)</text>
+    <text x="84" y="708">one document per claim</text>
+    <text x="84" y="730">timestamp = intimation date</text>
+    <text x="84" y="752">identifiers as typed entities</text>
+    <text x="84" y="774">+ tags  phone:… surveyor:SV12 …</text>
+    <text x="84" y="804" fill="#6b7280">LLM fact extraction · entity graph</text>
+
+    <rect x="436" y="654" width="330" height="180" rx="12" fill="#fff" stroke="#ddd6fe"/>
+    <text x="454" y="682" font-weight="700" fill="#5b21b6">Investigator outcomes</text>
+    <text x="454" y="708">verdict:&lt;claim&gt; documents</text>
+    <text x="454" y="730">timestamp = decision date</text>
+    <text x="454" y="752">fraud confirmed / cleared / paid</text>
+    <text x="454" y="774">+ the same entity tags</text>
+    <text x="454" y="804" fill="#6b7280">what turned out to be true</text>
+
+    <rect x="786" y="654" width="330" height="180" rx="12" fill="#fff" stroke="#ddd6fe"/>
+    <text x="804" y="682" font-weight="700" fill="#5b21b6">Learned knowledge</text>
+    <text x="804" y="708">observations (auto-consolidated)</text>
+    <text x="804" y="730">mental model: SIU fraud playbook</text>
+    <text x="804" y="752">refreshes after consolidation</text>
+    <text x="804" y="804" fill="#6b7280">nobody writes it by hand</text>
+
+    <rect x="1136" y="654" width="398" height="180" rx="12" fill="#fff" stroke="#ddd6fe"/>
+    <text x="1154" y="682" font-weight="700" fill="#5b21b6">Rules of evidence (reflect)</text>
+    <text x="1154" y="708">mission: SIU institutional memory</text>
+    <text x="1154" y="730">directives: lead ≠ proof · cite claim IDs</text>
+    <text x="1154" y="752">  volume ≠ fraud · respect cleared cases</text>
+    <text x="1154" y="774">disposition: skepticism 4 · literalism 4</text>
+    <text x="1154" y="796">  empathy 2</text>
+  </g>
+
+  <!-- arrows between agent and Hindsight -->
+  <line x1="470" y1="442" x2="470" y2="585" stroke="#2563eb" stroke-width="3" marker-end="url(#ab)"/>
+  <line x1="520" y1="585" x2="520" y2="442" stroke="#2563eb" stroke-width="3" marker-end="url(#ab)"/>
+  <rect x="540" y="478" width="300" height="70" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="556" y="504" font-size="16" font-weight="700" fill="#1d4ed8">RECALL ×17, in parallel</text>
+  <text x="556" y="530" font-size="14" fill="#1e3a8a">tags any/all_strict · reranker floor · temporal</text>
+
+  <line x1="180" y1="352" x2="180" y2="585" stroke="#15803d" stroke-width="3" marker-end="url(#ag)"/>
+  <rect x="196" y="478" width="210" height="70" rx="10" fill="#ecfdf5" stroke="#bbf7d0"/>
+  <text x="212" y="504" font-size="16" font-weight="700" fill="#15803d">RETAIN claim</text>
+  <text x="212" y="530" font-size="14" fill="#14532d">at intake</text>
+
+  <line x1="1250" y1="442" x2="1250" y2="585" stroke="#15803d" stroke-width="3" marker-end="url(#ag)"/>
+  <rect x="1060" y="478" width="178" height="70" rx="10" fill="#ecfdf5" stroke="#bbf7d0"/>
+  <text x="1076" y="504" font-size="16" font-weight="700" fill="#15803d">RETAIN outcome</text>
+  <text x="1076" y="530" font-size="14" fill="#14532d">memory learns</text>
+
+  <line x1="1440" y1="442" x2="1440" y2="585" stroke="#6d28d9" stroke-width="3" marker-end="url(#av)"/>
+  <line x1="1480" y1="585" x2="1480" y2="442" stroke="#6d28d9" stroke-width="3" marker-end="url(#av)"/>
+  <rect x="1275" y="478" width="150" height="70" rx="10" fill="#f5f3ff" stroke="#ddd6fe"/>
+  <text x="1290" y="504" font-size="16" font-weight="700" fill="#6d28d9">REFLECT</text>
+  <text x="1290" y="530" font-size="14" fill="#4c1d95">briefings · Q&amp;A</text>
+</svg>

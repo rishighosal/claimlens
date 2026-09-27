@@ -235,6 +235,7 @@ td.recalled b { font-weight: 550; color: var(--ink); }
 .decide-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .decide-row input { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font: inherit; min-width: 180px; }
 .decide-row input.grow { flex: 1; }
+.saving { margin-top: 10px; background: var(--violet-soft); color: var(--violet); padding: 8px 12px; border-radius: 8px; font-size: 13px; }
 .saved { margin-top: 10px; background: var(--green-soft); color: var(--green); padding: 8px 12px; border-radius: 8px; font-size: 13px; }
 
 /* ---------- memory panel ---------- */
