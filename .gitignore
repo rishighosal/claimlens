@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+frontend/dist/
+data/state.json
+data/test_state.json
+data/*.tmp
+data/eval/run_state.json
+data/eval/scores.jsonl
+.DS_Store
