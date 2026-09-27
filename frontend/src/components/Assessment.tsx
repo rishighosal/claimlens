@@ -1,10 +1,28 @@
+import { useEffect, useState } from "react";
 import type { Assessment as A } from "../types";
 import { bandLabel, riskTone } from "../api";
 
-export function Gauge({ score, size = 92 }: { score: number; size?: number }) {
+function useCountUp(target: number, ms = 900) {
+  const [v, setV] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / ms);
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms]);
+  return v;
+}
+
+export function Gauge({ score: target, size = 92 }: { score: number; size?: number }) {
+  const score = useCountUp(target);
   const r = size / 2 - 8;
   const c = 2 * Math.PI * r;
-  const tone = riskTone(score);
+  const tone = riskTone(target);
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className={`gauge ${tone}`}>
       <circle cx={size / 2} cy={size / 2} r={r} className="track" />

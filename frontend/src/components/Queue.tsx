@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { decisionLabel, inr, riskTone } from "../api";
 import type { Row } from "../types";
 
@@ -14,6 +15,10 @@ export function Queue({
   selected: string | null;
   onSelect: (id: string) => void;
 }) {
+  useEffect(() => {
+    // keep the selected claim visible when it's chosen from the guided demo or a link
+    document.querySelector(".q-item.sel")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selected, rows]);
   return (
     <nav className="queue">
       <div className="tabs">

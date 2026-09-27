@@ -14,6 +14,7 @@ before/after in the UI and the replay evaluation honest.
 from __future__ import annotations
 
 import asyncio
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
@@ -270,7 +271,7 @@ def evidence_graph(claim: dict, ranked: list[tuple[Link, float]], repo: C.ClaimR
                       "sub": C.summary(past) if past else "",
                       "date": (past or {}).get("intimation_date"),
                       "decision": verdict.get("decision"), "strength": strength,
-                      "reasons": sorted(ln.reasons)})
+                      "reasons": sorted(ln.reasons), "grade": grade(ln)[0]})
         for r in top:
             if r in ents:  # shared hard identifier -> route through an entity node
                 e = ents[r]
@@ -321,6 +322,7 @@ class Investigator:
                           retain: bool = True) -> dict[str, Any]:
         """Full intake: both assessments in parallel, then commit the claim to memory."""
         sink: list[MemoryOp] = []
+        t0 = time.perf_counter()
         now = datetime.now(timezone.utc).isoformat()
         # Live use: memory is recalled as of now, so outcomes recorded today count.
         (mem_assessment, ev), baseline = await asyncio.gather(
@@ -333,6 +335,9 @@ class Investigator:
             except Exception:
                 pass  # logged in the op trace; the assessment is still valid
         ranked = ev["ranked"]
+        graded = [(ln, s, grade(ln)) for ln, s in ranked]
+        graded.sort(key=lambda x: (x[2][0] != "STRONG", -x[1]))
+        recalls = [o for o in sink if o.op == "recall"]
         return {
             "claim_id": claim["claim_id"],
             "with_memory": mem_assessment,
@@ -340,9 +345,18 @@ class Investigator:
             "graph": evidence_graph(claim, ranked, repo, decisions),
             "linked_claims": [
                 {"claim_id": ln.claim_id, "strength": s, "reasons": sorted(ln.reasons),
+                 "grade": g, "grade_reason": why, "outcome_label": _outcome(ln),
                  "facts": ln.facts[:4], "outcome": ln.verdict_facts[:2]}
-                for ln, s in ranked
+                for ln, s, (g, why) in graded
             ],
+            "stats": {
+                "recalls": len(recalls),
+                "recall_hits": sum(o.hits or 0 for o in recalls),
+                "model_calls": 2,
+                "strong_links": sum(g == "STRONG" for _, _, (g, _) in graded),
+                "weak_links": sum(g == "WEAK" for _, _, (g, _) in graded),
+                "seconds": round(time.perf_counter() - t0, 1),
+            },
             "insights": ev["insights"],
             "probes": ev["probes"],
             "memory_ops": [o.to_dict() for o in sink],

@@ -85,7 +85,13 @@ class FakeHindsight:
         scored = []
         for f in b["facts"].values():
             if tags:
-                hit = bool(set(tags) & set(f.tags))
+                ft = set(f.tags)
+                if tags_match in ("all", "all_strict"):
+                    hit = set(tags) <= ft
+                elif tags_match == "exact":
+                    hit = set(tags) == ft
+                else:
+                    hit = bool(set(tags) & ft)
                 if tags_match in ("any_strict", "all_strict", "exact") and not hit:
                     continue
             overlap = len(q & f.toks)

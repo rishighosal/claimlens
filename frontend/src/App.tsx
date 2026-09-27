@@ -6,6 +6,24 @@ import { Drawer } from "./components/Drawer";
 import { EvalView } from "./components/EvalView";
 import { MemoryPanel } from "./components/MemoryPanel";
 import { Queue } from "./components/Queue";
+import { Tour } from "./components/Tour";
+
+const store = {
+  get(k: string, d: string) {
+    try {
+      return window.localStorage.getItem(k) ?? d;
+    } catch {
+      return d;
+    }
+  },
+  set(k: string, v: string) {
+    try {
+      window.localStorage.setItem(k, v);
+    } catch {
+      /* private mode: keep in memory only */
+    }
+  },
+};
 
 export default function App() {
   const [view, setView] = useState<"work" | "eval">("work");
@@ -16,6 +34,21 @@ export default function App() {
   const [status, setStatus] = useState<Status | null>(null);
   const [fresh, setFresh] = useState<MemoryOp[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [evalSeen, setEvalSeen] = useState(store.get("cl.evalSeen", "0") === "1");
+  const [tourShown, setTourShown] = useState(store.get("cl.tour", "1") === "1");
+  const [tourOpen, setTourOpen] = useState(store.get("cl.tourOpen", "0") === "1");
+
+  const showEval = () => {
+    setView("eval");
+    setEvalSeen(true);
+    store.set("cl.evalSeen", "1");
+  };
+  const go = (id: string) => {
+    setView("work");
+    if (scope !== "queue") setScope("queue");
+    setSel(id);
+  };
 
   const load = useCallback(() => {
     api.claims(scope).then(
@@ -47,7 +80,12 @@ export default function App() {
         </div>
         <nav className="views">
           <button className={view === "work" ? "on" : ""} onClick={() => setView("work")}>Investigate</button>
-          <button className={view === "eval" ? "on" : ""} onClick={() => setView("eval")}>Does memory help?</button>
+          <button className={view === "eval" ? "on" : ""} onClick={showEval}>Does memory help?</button>
+          {!tourShown && (
+            <button onClick={() => { setTourShown(true); setTourOpen(true); store.set("cl.tour", "1"); }}>
+              Guided demo
+            </button>
+          )}
         </nav>
         <div className="top-stats">
           {scope === "queue" && (
@@ -77,13 +115,24 @@ export default function App() {
         <main className="work">
           <Queue rows={rows} scope={scope} setScope={(s) => { setScope(s); setSel(null); }} selected={sel} onSelect={setSel} />
           <div className="center">
+            {tourShown && scope === "queue" && (
+              <Tour
+                rows={rows}
+                evalSeen={evalSeen}
+                open={tourOpen}
+                setOpen={(o) => { setTourOpen(o); store.set("cl.tourOpen", o ? "1" : "0"); }}
+                onGo={go}
+                onEval={showEval}
+                onHide={() => { setTourShown(false); store.set("cl.tour", "0"); }}
+              />
+            )}
             {sel ? (
-              <ClaimView key={sel} id={sel} onOpen={setDrawer} onChanged={load} onOps={setFresh} />
+              <ClaimView key={sel} id={sel} onOpen={setDrawer} onChanged={load} onOps={setFresh} onBusy={setBusy} />
             ) : (
               <div className="empty">Select a claim</div>
             )}
           </div>
-          <MemoryPanel status={status} fresh={fresh} />
+          <MemoryPanel status={status} fresh={fresh} live={busy} onOpen={setDrawer} />
         </main>
       )}
       {drawer && (

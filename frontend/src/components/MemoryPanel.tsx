@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import type { MemoryOp, Reflection, Status } from "../types";
+import { Markdown } from "./Markdown";
 
 const OP_LABEL: Record<string, string> = {
   retain: "RETAIN",
@@ -32,7 +33,17 @@ function Op({ o }: { o: MemoryOp }) {
   );
 }
 
-export function MemoryPanel({ status, fresh }: { status: Status | null; fresh: MemoryOp[] }) {
+export function MemoryPanel({
+  status,
+  fresh,
+  live,
+  onOpen,
+}: {
+  status: Status | null;
+  fresh: MemoryOp[];
+  live?: boolean;
+  onOpen?: (id: string) => void;
+}) {
   const [tab, setTab] = useState<"activity" | "playbook" | "ask">("activity");
   const [ops, setOps] = useState<MemoryOp[]>([]);
   const [pb, setPb] = useState<{ content: string; last_refreshed_at: string | null } | null>(null);
@@ -44,9 +55,14 @@ export function MemoryPanel({ status, fresh }: { status: Status | null; fresh: M
   useEffect(() => {
     const load = () => api.ops().then(setOps).catch(() => undefined);
     load();
-    const t = setInterval(load, 4000);
+    // While an investigation runs, poll fast so recalls appear as they complete.
+    const t = setInterval(load, live ? 600 : 4000);
     return () => clearInterval(t);
-  }, [fresh]);
+  }, [fresh, live]);
+
+  useEffect(() => {
+    if (live) setTab("activity"); // show memory working while an investigation runs
+  }, [live]);
 
   useEffect(() => {
     if (tab !== "playbook") return;
@@ -84,6 +100,11 @@ export function MemoryPanel({ status, fresh }: { status: Status | null; fresh: M
           <div><b>{status?.history_claims ?? "–"}</b><span>past claims</span></div>
         </div>
       </div>
+      {live && (
+        <div className="live-banner">
+          <span className="pulse" /> Hindsight is working: recalls appear below as they complete
+        </div>
+      )}
       <div className="tabs">
         {(["activity", "playbook", "ask"] as const).map((t) => (
           <button key={t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>
@@ -105,7 +126,13 @@ export function MemoryPanel({ status, fresh }: { status: Status | null; fresh: M
               this; the memory learned it.
             </p>
             {pbErr && <div className="error">{pbErr}</div>}
-            {pb ? <div className="pb-text">{pb.content || "Not generated yet. Refresh after seeding."}</div> : !pbErr && <div className="skeleton" />}
+            {pb ? (
+              <div className="pb-text">
+                {pb.content ? <Markdown text={pb.content} onOpen={onOpen} /> : "Not generated yet. Refresh after seeding."}
+              </div>
+            ) : (
+              !pbErr && <div className="skeleton" />
+            )}
             <div className="row-between">
               <span className="muted small">{pb?.last_refreshed_at ? `Refreshed ${pb.last_refreshed_at.slice(0, 16).replace("T", " ")}` : ""}</span>
               <button
@@ -140,7 +167,7 @@ export function MemoryPanel({ status, fresh }: { status: Status | null; fresh: M
             </div>
             {ans && (
               <div className="answer">
-                <div className="brief">{ans.text}</div>
+                <div className="brief"><Markdown text={ans.text} onOpen={onOpen} /></div>
                 <p className="footnote">Grounded in {ans.memories.length} memories</p>
               </div>
             )}

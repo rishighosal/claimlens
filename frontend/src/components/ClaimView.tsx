@@ -3,6 +3,7 @@ import { api, bandLabel, decisionLabel, inr, reasonLabel } from "../api";
 import type { ClaimDetail, Investigation, MemoryOp, Reflection } from "../types";
 import { RedFlags, VerdictCard } from "./Assessment";
 import { EvidenceGraph } from "./EvidenceGraph";
+import { Markdown } from "./Markdown";
 
 function Field({ k, v, mono }: { k: string; v: React.ReactNode; mono?: boolean }) {
   return (
@@ -76,11 +77,13 @@ export function ClaimView({
   onOpen,
   onChanged,
   onOps,
+  onBusy,
 }: {
   id: string;
   onOpen: (id: string) => void;
   onChanged: () => void;
   onOps: (ops: MemoryOp[]) => void;
+  onBusy?: (busy: boolean) => void;
 }) {
   const [d, setD] = useState<ClaimDetail | null>(null);
   const [busy, setBusy] = useState(false);
@@ -119,6 +122,7 @@ export function ClaimView({
 
   async function run() {
     setBusy(true);
+    onBusy?.(true);
     setErr(null);
     try {
       const r = await api.investigate(id);
@@ -129,17 +133,20 @@ export function ClaimView({
       setErr(e.message || String(e));
     } finally {
       setBusy(false);
+      onBusy?.(false);
     }
   }
 
   async function getBrief() {
     setBriefBusy(true);
+    onBusy?.(true);
     try {
       setBrief(await api.briefing(id));
     } catch (e: any) {
       setErr(e.message || String(e));
     } finally {
       setBriefBusy(false);
+      onBusy?.(false);
     }
   }
 
@@ -212,6 +219,15 @@ export function ClaimView({
             </div>
             <VerdictCard a={inv.with_memory} title="With Hindsight memory" memory />
           </section>
+          {inv.stats && (
+            <div className="stats-line">
+              <span><b>{inv.stats.recalls}</b> Hindsight recalls</span>
+              <span><b>{inv.stats.recall_hits}</b> memories returned</span>
+              <span><b className="strong-txt">{inv.stats.strong_links}</b> STRONG · <b>{inv.stats.weak_links}</b> WEAK links</span>
+              <span><b>{inv.stats.model_calls}</b> model calls</span>
+              <span><b>{inv.stats.seconds}s</b></span>
+            </div>
+          )}
 
           <section className="panel pad">
             <h2>Why: evidence from memory</h2>
@@ -228,7 +244,9 @@ export function ClaimView({
             <div className="row-between">
               <h2>How this claim connects to the past</h2>
               <span className="muted small">
-                {inv.linked_claims.length} linked claims · {inv.probes.length} memory probes
+                {inv.linked_claims.length} linked claims · {inv.probes.length} memory probes ·{" "}
+                <span className="grade strong">STRONG</span> = shared phone, account or vehicle, or same
+                surveyor/doctor as confirmed fraud
               </span>
             </div>
             <EvidenceGraph nodes={inv.graph.nodes} edges={inv.graph.edges} onOpen={onOpen} />
@@ -237,15 +255,22 @@ export function ClaimView({
                 <thead>
                   <tr>
                     <th>Past claim</th>
+                    <th>Evidence</th>
                     <th>Linked via</th>
                     <th>What memory recalled</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {inv.linked_claims.slice(0, 8).map((l) => (
+                  {inv.linked_claims.slice(0, 10).map((l) => (
                     <tr key={l.claim_id}>
                       <td>
                         <button className="chip link" onClick={() => onOpen(l.claim_id)}>{l.claim_id}</button>
+                      </td>
+                      <td>
+                        {l.grade && (
+                          <span className={`grade ${l.grade.toLowerCase()}`} title={l.grade_reason}>{l.grade}</span>
+                        )}
+                        {l.outcome_label && <div className="outcome-lbl">{l.outcome_label}</div>}
                       </td>
                       <td>
                         {l.reasons.filter((r) => r !== "timeline").map((r) => (
@@ -289,7 +314,7 @@ export function ClaimView({
               </div>
               {brief ? (
                 <>
-                  <div className="brief">{brief.text}</div>
+                  <div className="brief"><Markdown text={brief.text} onOpen={onOpen} /></div>
                   <p className="footnote">
                     Grounded in {brief.memories.length} memories
                     {brief.directives.length > 0 && <> · directives applied: {brief.directives.join(", ")}</>}

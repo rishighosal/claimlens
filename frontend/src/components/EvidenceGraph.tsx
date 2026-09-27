@@ -25,6 +25,7 @@ export function EvidenceGraph({
   const [hover, setHover] = useState<string | null>(null);
 
   const pos = useMemo(() => {
+    // layout is deterministic: same claim, same picture (useful for screenshots)
     const p: Record<string, { x: number; y: number }> = {};
     const current = nodes.find((n) => n.type === "current");
     if (current) p[current.id] = { x: CX, y: CY };
@@ -118,17 +119,24 @@ export function EvidenceGraph({
             );
           }
           const tone = n.decision === "fraud_confirmed" ? "fraud" : n.decision === "referred" ? "ref" : "ok";
+          const strong = n.grade === "STRONG";
           return (
             <g
               key={n.id}
               transform={`translate(${p.x},${p.y})`}
-              className={`node claim ${tone} ${on ? "" : "dim"}`}
+              className={`node claim ${tone} ${strong ? "strong" : "weak"} ${on ? "" : "dim"}`}
               onMouseEnter={() => setHover(n.id)}
               onMouseLeave={() => setHover(null)}
               onClick={() => onOpen(n.id)}
               style={{ cursor: "pointer" }}
             >
               <rect x={-54} y={-18} width={108} height={36} rx={8} />
+              {strong && (
+                <g transform="translate(0,-24)">
+                  <rect x={-27} y={-8} width={54} height={15} rx={7} className="strong-tag" />
+                  <text y={3} className="strong-tag-txt">STRONG</text>
+                </g>
+              )}
               <text y={-3} className="node-id">{n.label.replace("CLM-2026-", "#")}</text>
               <text y={11} className="node-sub">
                 {n.date?.slice(5)} · {n.decision ? decisionLabel[n.decision] || n.decision : "open"}
@@ -143,6 +151,7 @@ export function EvidenceGraph({
         <span><i className="lg provider" /> shared provider / agent</span>
         <span><i className="lg narrative" /> similar story</span>
         <span><i className="lg fraud" /> past outcome: fraud confirmed</span>
+        <span><i className="lg strongl" /> STRONG evidence (faded boxes are WEAK)</span>
       </div>
     </div>
   );

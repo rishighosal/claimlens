@@ -24,6 +24,10 @@ def test_investigate_and_record_outcome():
             assert 0 <= a["risk_score"] <= 100
             assert a["band"] in ("fast_track", "standard_review", "refer_to_siu")
         assert inv["probes"] and inv["memory_ops"]
+        assert inv["stats"]["recalls"] >= 15 and inv["stats"]["model_calls"] == 2
+        assert all(lc["grade"] in ("STRONG", "WEAK") and lc["grade_reason"] for lc in inv["linked_claims"])
+        grades = [lc["grade"] for lc in inv["linked_claims"]]
+        assert grades == sorted(grades, key=lambda g: g != "STRONG"), "STRONG links are listed first"
         assert any(o["op"] == "retain" for o in inv["memory_ops"]), "claim must be committed to memory at intake"
         allowed = {lc["claim_id"] for lc in inv["linked_claims"]}
         for f in inv["with_memory"]["red_flags"]:

@@ -55,6 +55,7 @@ export interface GraphNode {
   decision?: string | null;
   strength?: number;
   reasons?: string[];
+  grade?: "STRONG" | "WEAK";
 }
 
 export interface GraphEdge {
@@ -67,6 +68,9 @@ export interface LinkedClaim {
   claim_id: string;
   strength: number;
   reasons: string[];
+  grade?: "STRONG" | "WEAK";
+  grade_reason?: string;
+  outcome_label?: string;
   facts: string[];
   outcome: string[];
 }
@@ -80,6 +84,14 @@ export interface Investigation {
   insights: string[];
   probes: { reason: string; label: string; hits: number; linked_claims: string[]; entity: string | null }[];
   memory_ops: MemoryOp[];
+  stats?: {
+    recalls: number;
+    recall_hits: number;
+    model_calls: number;
+    strong_links: number;
+    weak_links: number;
+    seconds: number;
+  };
 }
 
 export interface Verdict {
