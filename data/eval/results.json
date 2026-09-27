@@ -1,0 +1,1206 @@
+{
+ "mode": "hindsight",
+ "model": "openai/gpt-oss-120b",
+ "bank": "claimlens-eval-202609272224",
+ "n_total": 215,
+ "generated_at": "2026-09-27T23:22:30",
+ "llm_usage": {
+  "calls": 82,
+  "prompt_tokens": 168352,
+  "completion_tokens": 25240,
+  "failures": 0
+ },
+ "threshold": 61,
+ "n_scored": 70,
+ "summary": {
+  "with_memory": {
+   "precision": 1.0,
+   "recall": 0.424,
+   "f1": 0.596,
+   "tp": 14,
+   "fp": 0,
+   "fn": 19,
+   "flagged": 14,
+   "fraud_amount_caught": 3674500,
+   "auc": 0.79
+  },
+  "stateless": {
+   "precision": 0.0,
+   "recall": 0.0,
+   "f1": 0.0,
+   "tp": 0,
+   "fp": 0,
+   "fn": 33,
+   "flagged": 0,
+   "fraud_amount_caught": 0,
+   "auc": 0.462
+  },
+  "fraud_amount_total": 8363650
+ },
+ "windows": [
+  {
+   "label": "Jan",
+   "n": 5,
+   "fraud": 0,
+   "with_memory_recall": null,
+   "stateless_recall": null,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Feb",
+   "n": 6,
+   "fraud": 0,
+   "with_memory_recall": null,
+   "stateless_recall": null,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Mar",
+   "n": 7,
+   "fraud": 4,
+   "with_memory_recall": 0.0,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Apr",
+   "n": 5,
+   "fraud": 2,
+   "with_memory_recall": 0.0,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "May",
+   "n": 8,
+   "fraud": 5,
+   "with_memory_recall": 0.0,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Jun",
+   "n": 7,
+   "fraud": 3,
+   "with_memory_recall": 0.0,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Jul",
+   "n": 12,
+   "fraud": 7,
+   "with_memory_recall": 0.42857142857142855,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Aug",
+   "n": 9,
+   "fraud": 5,
+   "with_memory_recall": 1.0,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  },
+  {
+   "label": "Sep",
+   "n": 11,
+   "fraud": 7,
+   "with_memory_recall": 0.8571428571428571,
+   "stateless_recall": 0.0,
+   "with_memory_fp": 0,
+   "stateless_fp": 0
+  }
+ ],
+ "by_ring": {
+  "R1": {
+   "n": 13,
+   "caught_with_memory": 6,
+   "caught_stateless": 0
+  },
+  "R2": {
+   "n": 11,
+   "caught_with_memory": 5,
+   "caught_stateless": 0
+  },
+  "R3": {
+   "n": 7,
+   "caught_with_memory": 3,
+   "caught_stateless": 0
+  },
+  "R4": {
+   "n": 2,
+   "caught_with_memory": 0,
+   "caught_stateless": 0
+  }
+ },
+ "per_claim": [
+  {
+   "claim_id": "CLM-2026-10410",
+   "date": "2026-01-19",
+   "label": "legit",
+   "ring": null,
+   "amount": 21500,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 1,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10412",
+   "date": "2026-01-22",
+   "label": "legit",
+   "ring": null,
+   "amount": 13200,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 4,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10413",
+   "date": "2026-01-24",
+   "label": "legit",
+   "ring": null,
+   "amount": 55800,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 2,
+   "top_flags": [
+    "Shared intermediary"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10415",
+   "date": "2026-01-29",
+   "label": "legit",
+   "ring": null,
+   "amount": 12900,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 5,
+   "top_flags": [
+    "shared garage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10416",
+   "date": "2026-01-29",
+   "label": "legit",
+   "ring": null,
+   "amount": 11050,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 7,
+   "top_flags": [
+    "Similar narrative pattern"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10418",
+   "date": "2026-02-03",
+   "label": "legit",
+   "ring": null,
+   "amount": 52200,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 7,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10419",
+   "date": "2026-02-05",
+   "label": "legit",
+   "ring": null,
+   "amount": 67000,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 5,
+   "top_flags": [
+    "Weak similarity to other gastroenteritis claims"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10423",
+   "date": "2026-02-10",
+   "label": "legit",
+   "ring": null,
+   "amount": 6650,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 5,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10424",
+   "date": "2026-02-12",
+   "label": "legit",
+   "ring": null,
+   "amount": 12700,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 8,
+   "top_flags": [
+    "Repeated garage usage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10425",
+   "date": "2026-02-14",
+   "label": "legit",
+   "ring": null,
+   "amount": 20450,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 8,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10432",
+   "date": "2026-02-23",
+   "label": "legit",
+   "ring": null,
+   "amount": 285000,
+   "line": "health",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 6,
+   "top_flags": [
+    "shared intermediary"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10435",
+   "date": "2026-03-01",
+   "label": "legit",
+   "ring": null,
+   "amount": 68750,
+   "line": "health",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 6,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10439",
+   "date": "2026-03-04",
+   "label": "legit",
+   "ring": null,
+   "amount": 303600,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 5,
+   "top_flags": [
+    "Intermediary reuse"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10441",
+   "date": "2026-03-08",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 92350,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10442",
+   "date": "2026-03-09",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 34650,
+   "line": "health",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 3,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10447",
+   "date": "2026-03-15",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 31150,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 3,
+   "top_flags": [
+    "Shared hospital and intermediary"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10450",
+   "date": "2026-03-16",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 47150,
+   "line": "health",
+   "with_memory": 22,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 4,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10459",
+   "date": "2026-03-31",
+   "label": "legit",
+   "ring": null,
+   "amount": 24400,
+   "line": "health",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10461",
+   "date": "2026-04-01",
+   "label": "legit",
+   "ring": null,
+   "amount": 69150,
+   "line": "health",
+   "with_memory": 12,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10462",
+   "date": "2026-04-03",
+   "label": "legit",
+   "ring": null,
+   "amount": 4900,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "similar_story"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10466",
+   "date": "2026-04-12",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 82900,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "shared garage and surveyor"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10467",
+   "date": "2026-04-15",
+   "label": "legit",
+   "ring": null,
+   "amount": 7350,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared garage and surveyor (weak)"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10475",
+   "date": "2026-04-23",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 125950,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10481",
+   "date": "2026-05-04",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 47250,
+   "line": "health",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 6,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10482",
+   "date": "2026-05-06",
+   "label": "legit",
+   "ring": null,
+   "amount": 64650,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10490",
+   "date": "2026-05-16",
+   "label": "legit",
+   "ring": null,
+   "amount": 108550,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10497",
+   "date": "2026-05-19",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 32900,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 7,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10502",
+   "date": "2026-05-22",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 127650,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated garage and surveyor usage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10503",
+   "date": "2026-05-22",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 600950,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-20b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10504",
+   "date": "2026-05-23",
+   "label": "legit",
+   "ring": null,
+   "amount": 8950,
+   "line": "motor",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10510",
+   "date": "2026-05-29",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 1172800,
+   "line": "motor",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10513",
+   "date": "2026-06-02",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 31300,
+   "line": "health",
+   "with_memory": 22,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 9,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10514",
+   "date": "2026-06-05",
+   "label": "legit",
+   "ring": null,
+   "amount": 17900,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated surveyor usage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10520",
+   "date": "2026-06-15",
+   "label": "legit",
+   "ring": null,
+   "amount": 13300,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated garage/intermediary usage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10521",
+   "date": "2026-06-17",
+   "label": "legit",
+   "ring": null,
+   "amount": 130400,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10522",
+   "date": "2026-06-18",
+   "label": "fraud",
+   "ring": "R4",
+   "amount": 95000,
+   "line": "motor",
+   "with_memory": 45,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Vehicle identifier reused"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10525",
+   "date": "2026-06-21",
+   "label": "legit",
+   "ring": null,
+   "amount": 20400,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10534",
+   "date": "2026-06-30",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 619600,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10539",
+   "date": "2026-07-03",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 1162250,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Weak similarity to prior claims"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10540",
+   "date": "2026-07-04",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 82800,
+   "line": "motor",
+   "with_memory": 45,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared phone number"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10541",
+   "date": "2026-07-07",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 47000,
+   "line": "health",
+   "with_memory": 82,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 9,
+   "top_flags": [
+    "Shared treating doctor with confirmed fraud",
+    "Phone number reused on different policy"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10542",
+   "date": "2026-07-07",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 50900,
+   "line": "health",
+   "with_memory": 75,
+   "stateless": 25,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Confirmed-fraud link"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10548",
+   "date": "2026-07-12",
+   "label": "legit",
+   "ring": null,
+   "amount": 91700,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10553",
+   "date": "2026-07-21",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 104750,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10554",
+   "date": "2026-07-21",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 51800,
+   "line": "health",
+   "with_memory": 75,
+   "stateless": 10,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Doctor\u2011hospital fraud link"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10558",
+   "date": "2026-07-25",
+   "label": "legit",
+   "ring": null,
+   "amount": 37850,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated narrative pattern"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10562",
+   "date": "2026-07-28",
+   "label": "legit",
+   "ring": null,
+   "amount": 83300,
+   "line": "health",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10563",
+   "date": "2026-07-30",
+   "label": "legit",
+   "ring": null,
+   "amount": 214800,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10565",
+   "date": "2026-07-31",
+   "label": "legit",
+   "ring": null,
+   "amount": 14950,
+   "line": "motor",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10566",
+   "date": "2026-07-31",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 97000,
+   "line": "motor",
+   "with_memory": 45,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared payee account"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10569",
+   "date": "2026-08-03",
+   "label": "legit",
+   "ring": null,
+   "amount": 86650,
+   "line": "health",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10571",
+   "date": "2026-08-09",
+   "label": "legit",
+   "ring": null,
+   "amount": 121050,
+   "line": "health",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10572",
+   "date": "2026-08-09",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 104500,
+   "line": "motor",
+   "with_memory": 70,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared phone number across claims"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10573",
+   "date": "2026-08-09",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 948950,
+   "line": "motor",
+   "with_memory": 75,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared surveyor and intermediary with confirmed fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10577",
+   "date": "2026-08-15",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 1126400,
+   "line": "motor",
+   "with_memory": 75,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared address block and intermediary with confirmed fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10580",
+   "date": "2026-08-18",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 115950,
+   "line": "motor",
+   "with_memory": 85,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Surveyor linked to confirmed fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10581",
+   "date": "2026-08-19",
+   "label": "legit",
+   "ring": null,
+   "amount": 10550,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10585",
+   "date": "2026-08-23",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 88200,
+   "line": "motor",
+   "with_memory": 75,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Strong link to confirmed fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10586",
+   "date": "2026-08-26",
+   "label": "legit",
+   "ring": null,
+   "amount": 157750,
+   "line": "motor",
+   "with_memory": 20,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10593",
+   "date": "2026-09-06",
+   "label": "legit",
+   "ring": null,
+   "amount": 37900,
+   "line": "motor",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated narrative pattern"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10595",
+   "date": "2026-09-08",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 82400,
+   "line": "motor",
+   "with_memory": 85,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared payee account with confirmed fraud",
+    "Shared phone number with confirmed fraud",
+    "Same surveyor linked to fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10597",
+   "date": "2026-09-10",
+   "label": "fraud",
+   "ring": "R4",
+   "amount": 100750,
+   "line": "motor",
+   "with_memory": 45,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Repeated vehicle usage"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10600",
+   "date": "2026-09-13",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 51900,
+   "line": "health",
+   "with_memory": 85,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared phone number with fraud",
+    "Shared phone number with another claim"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10602",
+   "date": "2026-09-14",
+   "label": "legit",
+   "ring": null,
+   "amount": 6650,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10603",
+   "date": "2026-09-15",
+   "label": "fraud",
+   "ring": "R3",
+   "amount": 763850,
+   "line": "motor",
+   "with_memory": 85,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Shared address block with confirmed fraud claim CLM-2026-10577",
+    "Shared address block with confirmed fraud claim CLM-2026-10539"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10606",
+   "date": "2026-09-17",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 117000,
+   "line": "motor",
+   "with_memory": 85,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Surveyor linked to confirmed fraud",
+    "Garage linked to confirmed fraud"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10609",
+   "date": "2026-09-21",
+   "label": "legit",
+   "ring": null,
+   "amount": 27500,
+   "line": "motor",
+   "with_memory": 15,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Pattern of similar rear\u2011end stories"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10611",
+   "date": "2026-09-21",
+   "label": "fraud",
+   "ring": "R2",
+   "amount": 52150,
+   "line": "health",
+   "with_memory": 75,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Confirmed fraud link"
+   ]
+  },
+  {
+   "claim_id": "CLM-2026-10612",
+   "date": "2026-09-22",
+   "label": "legit",
+   "ring": null,
+   "amount": 17300,
+   "line": "motor",
+   "with_memory": 12,
+   "stateless": 15,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": []
+  },
+  {
+   "claim_id": "CLM-2026-10613",
+   "date": "2026-09-23",
+   "label": "fraud",
+   "ring": "R1",
+   "amount": 73500,
+   "line": "motor",
+   "with_memory": 85,
+   "stateless": 12,
+   "with_memory_model": "openai/gpt-oss-120b",
+   "stateless_model": "openai/gpt-oss-120b",
+   "links": 10,
+   "top_flags": [
+    "Surveyor linked to confirmed fraud",
+    "Garage linked to confirmed fraud"
+   ]
+  }
+ ]
+}

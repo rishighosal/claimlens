@@ -1,6 +1,6 @@
 <!--
 DRAFT for one team member. Before publishing:
-  1. Replace every {{PLACEHOLDER}} with numbers from data/eval/results.md (never invent them).
+  1. Numbers below are from the real replay run (data/eval/results.md). Keep them in sync if you re-run it.
   2. Add the 4 screenshots listed in docs/DEMO.md where marked [IMAGE].
   3. Make it sound like you. Each teammate should take a different angle (see content/README.md).
   4. Delete this comment block before publishing, and make sure the event name never appears (hashtags included).
@@ -22,7 +22,7 @@ ClaimLens is a triage workbench for an insurer's Special Investigation Unit (SIU
 2. **Scores it twice.** The same model with the same prompt scores the claim once on its own and once with everything memory recalled. The UI puts the two side by side. The only variable is memory.
 3. **Learns from the outcome.** When an investigator closes the claim (approved, cleared, referred, or fraud confirmed), that outcome is written back to memory with its date and reasons. The next claim that touches the same people, providers or story is judged with it.
 
-The memory layer is [Hindsight](https://github.com/vectorize-io/hindsight), an open-source agent memory system from Vectorize. I'll spend most of this post on how I used it, because the design choices there mattered much more than the prompt.
+The memory layer is [Hindsight](https://github.com/vectorize-io/hindsight), an open-source agent memory system from Vectorize. How I used it mattered far more than the prompt.
 
 [IMAGE: side-by-side "Without memory" vs "With Hindsight memory" cards on the same claim]
 
@@ -64,9 +64,7 @@ return {
 }
 ```
 
-The tag-scoped recalls give me the exact links ("these three claimants share one phone"). The narrative probe relies on [Hindsight's retrieval](https://hindsight.vectorize.io/), which runs semantic, keyword, graph and temporal search in parallel and reranks the results. That catches something tags never will: five different people describing a staged accident in almost the same sentence. The `min_scores` reranker floor was a late fix. Semantic search always returns *something*, and without a floor every claim had a "similar story".
-
-All the probes run concurrently, and their results are folded into a ranked set of linked past claims. Personal identifiers weigh more than shared providers, and a link to a claim SIU already repudiated weighs most. Only that ranked evidence reaches the model.
+Tag-scoped recalls give exact links ("these three claimants share one phone"). The narrative probe uses [Hindsight's retrieval](https://hindsight.vectorize.io/), which runs semantic, keyword, graph and temporal search in parallel and reranks. It catches what tags can't: different people telling a staged accident in almost the same words. The `min_scores` reranker floor was a late fix. Semantic search always returns *something*, and without a floor every claim had a "similar story".
 
 [IMAGE: evidence graph: new claim in the centre, shared phone / account / surveyor nodes, past claims around it, confirmed-fraud claims outlined in red]
 
@@ -81,9 +79,9 @@ The part I underestimated was investigator outcomes. A claim file tells you what
 "tags": ["verdict", f"decision:{verdict['decision']}", *[e.tag for e in ents]],
 ```
 
-That gives the demo its best moment. I confirm fraud on one claim, open the next claim from the same ring nine days later, and the evidence now cites the claim I closed a minute ago. Nothing was retrained or re-indexed; I made one retain call.
+That gives the demo its best moment: I confirm fraud on one claim, open the next claim from the same ring, and its evidence now includes the claim I closed a minute ago. That took one retain call, with no retraining and no re-indexing.
 
-Outcomes also stop the agent from being paranoid. The dataset includes an authorised Hyundai dealer with far more claims than anyone else, all genuine, and genuine claims at the fraud ring's garage that were handled by other surveyors. Because memory holds "approved, surveyor assessment accepted" for those, the agent learns the actual pattern (this garage *with this surveyor*) instead of "this garage is bad".
+Outcomes also keep the agent from being paranoid. An honest claim at the ring's own garage, with a different surveyor, first scored 80 with a smaller model. The fix was to label every recalled link STRONG (a shared phone, bank account or vehicle, or the same surveyor as *confirmed* fraud) or WEAK (only a shared garage or story) before the model sees it. The same claim now scores 22.
 
 ## Rules of evidence, in the memory bank itself
 
@@ -94,13 +92,9 @@ Hindsight banks have a mission, directives and a disposition, and `reflect` reas
 - *High claim volume at a garage or hospital is not suspicious by itself.*
 - *If investigators previously cleared a similar claim, say so and lower suspicion.*
 
-The disposition is skepticism 4, literalism 4, empathy 2: sceptical and precise about identifiers, but not dismissive of genuine claimants. The investigator briefing and the "ask memory" box both go through `reflect`, so these rules apply there too.
+The disposition is skepticism 4, literalism 4, empathy 2. The investigator briefing and the "ask memory" box both go through `reflect`, so the rules apply there too. Citations are also enforced in code: any claim ID the model cites that memory didn't return is stripped.
 
-I also enforce citations in code. If the model cites a claim ID that wasn't in the recalled evidence, it gets stripped, and the UI shows how many were removed. The model proposes; memory has to back it up.
-
-## A playbook nobody wrote
-
-One more Hindsight feature turned out to be the most fun to demo: [mental models](https://vectorize.io/what-is-agent-memory). I created one called *SIU fraud playbook* with a source query asking which fraud patterns investigators have confirmed, which entities were involved, and what separates them from genuine claims. It's set to refresh after consolidation. As outcomes accumulate, it rewrites itself into a readable summary of the unit's institutional knowledge, and the agent uses it in `reflect`.
+A Hindsight [mental model](https://vectorize.io/what-is-agent-memory) called *SIU fraud playbook* rounds it out. It refreshes after consolidation and rewrites itself into a readable summary of confirmed patterns as outcomes accumulate. Nobody wrote it.
 
 [IMAGE: the Playbook panel]
 
@@ -112,21 +106,27 @@ Same model, same prompt:
 
 | | Without memory | With Hindsight |
 |---|---|---|
-| Fraud claims flagged | {{RECALL_WITHOUT}} | {{RECALL_WITH}} |
-| Precision | {{PRECISION_WITHOUT}} | {{PRECISION_WITH}} |
-| Genuine claims flagged | {{FP_WITHOUT}} | {{FP_WITH}} |
+| Fraud claims flagged, whole year | 0 of 33 | 14 of 33 |
+| Fraud claims flagged, Aug–Sep | 0 of 12 | 11 of 12 |
+| Genuine claims wrongly flagged | 0 | 0 |
+| ROC AUC | 0.46 | 0.79 |
+| Fraud value flagged | ₹0 | ₹36.7 lakh |
+
+Month by month, the share of fraud claims flagged with memory went 0% (March–June), 43% (July), 100% (August), 86% (September). Without memory it was 0% every month. The model was the same, `gpt-oss-120b`, and so was the prompt.
 
 [IMAGE: data/eval/learning_curve.png]
 
-The shape matters more than the totals. The first claims of every ring are missed with or without memory, because there's nothing to remember yet. After that, the memory arm starts catching them, and it gets better as investigators close cases. Without memory, the curve stays flat.
+The shape matters more than the totals. From March to June memory catches nothing either, and that's correct: the ring's early claims were paid, nothing was confirmed yet, and "same garage, same surveyor, claims approved" isn't evidence. In July investigators repudiate the first ring claims, those outcomes land in Hindsight, and the curve jumps. In August every fraud claim was flagged, and not one genuine claim was flagged in the whole replay.
+
+The honest miss: the recycled vehicle. Both repeat claims on the same Creta scored 45, which means "standard review", not "refer". Nobody had confirmed anything about that car, so the agent sent it for review rather than to SIU. For an SIU that's the right bias, because a false accusation is expensive.
 
 ## What I'd tell someone building this
 
-1. **Design memory writes for the reads you need.** Passing identifiers as both entities and tags cost nothing at write time and made exact linking trivial at read time.
-2. **Make the agent ask many narrow questions, not one broad one.** Ten scoped recalls beat one big semantic query, and each one gives you an explainable reason for the link.
-3. **Store outcomes, not just inputs.** "What happened next" is the most valuable memory a decision-support agent can have, and it's what makes the agent *learn* instead of just search.
-4. **Measure with an ablation, not a demo.** Running the same model with and without memory is the only honest way to show memory did the work.
-5. **Put your rules of evidence where the reasoning happens.** Directives in the bank, plus citation checks in code, kept a fraud agent from turning into an accusation machine.
+1. **Design memory writes for the reads you need.** Identifiers as both entities and tags made exact linking trivial.
+2. **Ask many narrow questions, not one broad one.** Scoped recalls beat one big semantic query, and each explains its link.
+3. **Store outcomes, not just inputs.** "What happened next" is what makes an agent *learn* instead of just search.
+4. **Measure with an ablation.** The same model with and without memory is the only honest proof.
+5. **Grade evidence before the model sees it.** STRONG/WEAK labels and citation checks kept it from becoming an accusation machine.
 
 ClaimLens recommends; people decide. But now it has the one thing claims handlers never have enough of: a memory of every claim that came before.
 

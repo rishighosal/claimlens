@@ -50,6 +50,23 @@ python scripts/replay_eval.py --sample 70
 
 Outputs `data/eval/results.md`, `results.json` (shown in the app under **Does memory help?**) and `learning_curve.png`.
 
+**Results** (215 claims replayed, 70 scored: all 33 fraud + 37 random genuine; `openai/gpt-oss-120b` on Groq for both arms; flag = risk ≥ 61):
+
+| | Without memory | With Hindsight |
+|---|---|---|
+| Fraud flagged, whole year | 0 / 33 | 14 / 33 |
+| Fraud flagged, Aug–Sep | 0 / 12 | **11 / 12** |
+| Genuine claims flagged | 0 | **0** |
+| ROC AUC | 0.46 | 0.79 |
+| Fraud value flagged | ₹0 | ₹36,74,500 |
+
+| Month | Mar | Apr | May | Jun | Jul | Aug | Sep |
+|---|---|---|---|---|---|---|---|
+| Fraud flagged with memory | 0% | 0% | 0% | 0% | 43% | 100% | 86% |
+| Fraud flagged without memory | 0% | 0% | 0% | 0% | 0% | 0% | 0% |
+
+Early ring claims are missed on purpose: they were paid before anyone noticed, and "same garage, same surveyor, previous claims approved" is not evidence. Once investigators confirm the first cases (July), Hindsight recalls those outcomes and the agent catches the rest of the ring, without flagging a single genuine claim. The one systematic miss is the second recycled-vehicle claim (scored 45, "standard review"): with no confirmed fraud on that car yet, the agent escalates to review, not SIU.
+
 ## Data
 
 `scripts/generate_data.py` builds a seeded, realistic dataset: 213 motor and health claims from Hyderabad, January to September 2026. Real areas, police stations, IFSC-style accounts and IDVs; invented people and businesses. Four fraud patterns are hidden inside:
@@ -102,7 +119,7 @@ Tests: `pytest` (18 tests, no network). `tests/test_hindsight_contract.py` pushe
              mission · directives · disposition · SIU playbook mental model
 ```
 
-Robustness: the model is asked for JSON (no function calling). Responses go through lenient parsing, retries with backoff and `Retry-After`, JSON mode switched off on retries, a fallback model, then a deterministic link-strength score. The band is always derived from the score, and uncited claim IDs are removed. One failed recall probe never sinks an investigation.
+Robustness: the model is asked for JSON (no function calling). Responses go through lenient parsing, rate limits waited out using `Retry-After`, missing models skipped, JSON mode switched off on retries, a chain of backup models, then a conservative link-analysis score that counts only shared personal identifiers and links to confirmed fraud. The replay evaluation runs in strict mode and never uses that fallback. The band is always derived from the score, and uncited claim IDs are removed. One failed recall probe never sinks an investigation.
 
 ## Repo map
 

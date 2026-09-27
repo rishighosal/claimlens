@@ -37,6 +37,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
+import logging  # noqa: E402
+
 from claimlens import claims as C  # noqa: E402
 from claimlens.agent import Investigator  # noqa: E402
 from claimlens.config import settings  # noqa: E402
@@ -178,7 +180,21 @@ def chart(res: dict) -> None:
     fig.savefig(OUT / "learning_curve.png")
 
 
+async def score_pair(agent: Investigator, c: dict) -> tuple[dict, dict, dict]:
+    """Score one claim with and without memory, guaranteeing both arms used the SAME model.
+
+    If rate limits pushed one arm onto a backup model, the other arm is re-scored
+    on that same model, so the comparison is always like-for-like."""
+    (mem_a, ev), base = await asyncio.gather(agent.assess_with_memory(c), agent.assess_stateless(c))
+    if mem_a["model"] != base["model"]:
+        pinned = Investigator(agent.memory, LLM(model=mem_a["model"], fallback_model=""), strict=True)
+        print(f"      (arms used different models; re-scoring baseline on {mem_a['model']})", flush=True)
+        base = await pinned.assess_stateless(c)
+    return mem_a, ev, base
+
+
 async def main() -> None:
+    logging.basicConfig(level=logging.WARNING, format="      %(message)s")
     ap = argparse.ArgumentParser()
     g = ap.add_mutually_exclusive_group()
     g.add_argument("--sample", type=int, default=70, help="score all fraud claims + random genuine claims up to N")
@@ -186,6 +202,8 @@ async def main() -> None:
     ap.add_argument("--bank", default=None, help="bank id (default: fresh claimlens-eval-<timestamp>)")
     ap.add_argument("--resume", action="store_true", help="reuse the bank and cached scores from the last run")
     ap.add_argument("--batch", type=int, default=8)
+    ap.add_argument("--pace", type=float, default=0.0,
+                    help="seconds to pause after each scored claim (free LLM tiers: try 8)")
     args = ap.parse_args()
 
     if not settings.fake_memory and not settings.hindsight_api_key:
@@ -211,7 +229,9 @@ async def main() -> None:
     claims = sorted(repo.all(), key=lambda c: (c["intimation_date"], c["claim_id"]))
     scored = pick_scored(claims, None if args.all else args.sample)
     mem = ClaimMemory(bank_id=state["bank"])
-    agent = Investigator(mem, LLM())
+    # strict: a claim is scored by the language model or not at all. The
+    # deterministic fallback would contaminate a with/without comparison.
+    agent = Investigator(mem, LLM(), strict=True)
     print(f"Bank {state['bank']}: replaying {len(claims)} claims, scoring {len(scored)}")
     if not args.resume:
         await mem.setup_bank(with_playbook=False)
@@ -247,9 +267,10 @@ async def main() -> None:
             if cid in cache:
                 row = cache[cid]
             else:
+                if pending:
+                    print(f"      retaining {len(pending)} items into memory before {cid} ...", flush=True)
                 await flush()  # memory must hold everything before this claim
-                (mem_a, ev), base = await asyncio.gather(
-                    agent.assess_with_memory(c), agent.assess_stateless(c))
+                mem_a, ev, base = await score_pair(agent, c)
                 t = c["_truth"]
                 row = {"claim_id": cid, "date": today, "label": t["label"], "ring": t["ring"],
                        "amount": c["claimed_amount"], "line": c["line"],
@@ -259,10 +280,13 @@ async def main() -> None:
                        "top_flags": [f["title"] for f in mem_a["red_flags"][:3]]}
                 with cache_file.open("a") as f:
                     f.write(json.dumps(row) + "\n")
+                if args.pace:
+                    await asyncio.sleep(args.pace)
                 mark = "FRAUD" if t["label"] == "fraud" else "     "
+                model_tag = "" if mem_a["model"] == agent.llm.model else f"  [{mem_a['model']}]"
                 print(f"[{n:3d}/{len(claims)}] {cid} {today} {mark} {t['ring'] or '  '}  "
                       f"without={base['risk_score']:3d}  with={mem_a['risk_score']:3d}  links={row['links']:2d}  "
-                      f"({time.time() - t0:,.0f}s)", flush=True)
+                      f"({time.time() - t0:,.0f}s){model_tag}", flush=True)
             rows.append(row)
         if cid not in retained:
             pending.append(ClaimMemory.claim_item(c))

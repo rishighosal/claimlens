@@ -25,7 +25,7 @@ Length ~3:00. Screen recording + face cam if possible, 1080p, font zoom 110–12
 *Ask: 'What do the Lifeline Multispeciality claims have in common?'*
 
 **[2:30–3:00] Takeaway**
-"We replayed nine months of claims to measure it. Same model with and without memory: [X]% versus [Y]% of fraud caught. What surprised me: storing investigator *outcomes*, not just claims, is what made it learn. That's ClaimLens."
+"We replayed nine months of claims to measure it. Same model with and without memory. Without memory it caught zero fraud all year. With Hindsight, once investigators had confirmed the first cases, it caught eleven of the twelve fraud claims in August and September, and it never flagged an honest claim. What surprised me: storing investigator *outcomes*, not just claims, is what made it learn. That's ClaimLens."
 *On screen: Does memory help? tab.*
 
 ## YouTube titles

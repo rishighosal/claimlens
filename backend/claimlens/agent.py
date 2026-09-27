@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
 from . import claims as C
@@ -45,6 +46,18 @@ Rules:
   (phone, bank account, vehicle, address) across different claimants, near-identical narratives,
   a provider pair previously confirmed as fraud, or claims very soon after policy start are strong signals.
 - If history shows similar claims were investigated and cleared as genuine, treat that as mitigating.
+- Fraud rings are combinations. A past fraud claim that shares ONLY the garage or hospital (and/or a similar
+  story) with this claim, with a different surveyor/doctor and no shared personal identifiers, is weak context,
+  not a red flag. Honest claimants use the same garages. Each HISTORY entry is labelled STRONG or WEAK; respect it.
+- The same phone, bank account or vehicle appearing under a DIFFERENT claimant or policy is strong evidence even if
+  those earlier claims were approved: early ring claims are usually paid before anyone notices. The same vehicle
+  claiming the same damage again is a classic recycled-damage pattern.
+- Score from STRONG evidence: no STRONG links -> normally fast_track; exactly one STRONG link that is not
+  confirmed fraud -> standard_review; one STRONG link to a confirmed-fraud claim, or two or more STRONG links
+  -> refer_to_siu (score above 60). A vehicle, phone or bank account is a personal identifier: if the HISTORY
+  says one is shared, never state that no personal identifiers are shared.
+- When you cite a past claim, state its recorded outcome exactly (approved, cleared or confirmed fraud). Never call an approved claim fraudulent.
+- An intermediary (agent) shared with past claims is weak evidence unless those claims were confirmed fraud through that same agent.
 - A pattern is a lead, not proof: recommend verification, never accuse."""
 
 NO_HISTORY = "HISTORY: none available. You are seeing this claim in isolation."
@@ -53,18 +66,31 @@ NO_HISTORY = "HISTORY: none available. You are seeing this claim in isolation."
 def _history_block(claim: dict, links: list[tuple[Link, float]], insights: list[str]) -> str:
     if not links and not insights:
         return "HISTORY (from institutional memory): nothing related found."
-    out = ["HISTORY (recalled from institutional memory; each entry is a past claim linked to this one):"]
-    for ln, strength in links:
-        reasons = ", ".join(sorted(C.KIND_LABEL.get(r, r) for r in ln.reasons))
-        out.append(f"\n[{ln.claim_id}] linked via: {reasons} (link strength {strength:.1f})")
-        for t in ln.facts[:4]:
-            out.append(f"  - {t}")
-        for t in ln.verdict_facts[:3]:
-            out.append(f"  - OUTCOME: {t}")
+    graded = [(ln, strength, grade(ln)) for ln, strength in links]
+    n_strong = sum(g[0] == "STRONG" for _, _, g in graded)
+    n_strong_fraud = sum(g[0] == "STRONG" and _is_fraud(ln) for ln, _, g in graded)
+    out = ["HISTORY (recalled from institutional memory; each entry is a past claim linked to this one):",
+           f"Summary: {n_strong} STRONG links ({n_strong_fraud} to confirmed-fraud claims), "
+           f"{len(graded) - n_strong} WEAK links."]
+    graded.sort(key=lambda x: (x[2][0] != "STRONG", -x[1]))
+    for ln, strength, (label, why) in graded:
+        reasons = ", ".join(sorted(C.KIND_LABEL.get(r, r) for r in ln.reasons if r != "timeline"))
+        out.append(f"\n[{ln.claim_id}] {label}: {why}. Linked via: {reasons}.")
+        for t in ln.verdict_facts[:2]:
+            out.append(f"  - OUTCOME: {_clip(t)}")
+        if not ln.verdict_facts:
+            out.append("  - OUTCOME: none recorded in memory")
+        for t in ln.facts[:2]:
+            out.append(f"  - {_clip(t)}")
     if insights:
         out.append("\nConsolidated observations from memory:")
-        out.extend(f"  - {t}" for t in insights[:6])
+        out.extend(f"  - {_clip(t, 300)}" for t in insights[:4])
     return "\n".join(out)
+
+
+def _clip(t: str, n: int = 240) -> str:
+    t = " ".join(t.split())
+    return t if len(t) <= n else t[: n - 1] + "…"
 
 
 def _claim_block(claim: dict) -> str:
@@ -92,7 +118,7 @@ def link_strength(ln: Link) -> float:
     return round(s, 2)
 
 
-def rank_links(links: dict[str, Link], k: int = 14) -> list[tuple[Link, float]]:
+def rank_links(links: dict[str, Link], k: int = 10) -> list[tuple[Link, float]]:
     # A claim that only co-occurs in time (or only in a generic pattern recall)
     # is noise, not a link.
     real = [ln for ln in links.values() if ln.reasons - {"timeline", "pattern"}]
@@ -140,21 +166,77 @@ def make_validator(allowed_ids: set[str]):
     return validate
 
 
+STRONG_PERSONAL = {"phone", "account", "vehicle"}
+PAIRING = {"surveyor", "doctor", "phone", "account", "vehicle", "address", "agent"}
+
+
+def _is_fraud(ln: Link) -> bool:
+    j = " ".join(ln.verdict_facts).lower()
+    return "confirmed fraud" in j or "repudiated" in j or "fraud_confirmed" in j
+
+
+def evidence_points(ln: Link) -> int:
+    """Conservative evidence score for one linked claim (used only when no LLM is reachable).
+
+    Shared providers, a similar story or a busy garage alone score ~nothing:
+    that is exactly how honest claims at a fraud-ring garage look."""
+    pts = 0
+    if ln.reasons & STRONG_PERSONAL:
+        pts += 4
+    if _is_fraud(ln) and ln.reasons & PAIRING:
+        pts += 3
+    elif _is_fraud(ln) and "narrative" in ln.reasons and ln.reasons & {"garage", "hospital"}:
+        pts += 1
+    return pts
+
+
+def grade(ln: Link) -> tuple[str, str]:
+    """Label a link STRONG or WEAK with a plain reason, so the model weighs combinations, not topics."""
+    personal = sorted(ln.reasons & STRONG_PERSONAL)
+    fraud = _is_fraud(ln)
+    if personal:
+        what = ", ".join(C.KIND_LABEL[k] for k in personal)
+        return "STRONG", f"{what} (a personal identifier) appears on a different claim/policy" + (
+            " that SIU confirmed as fraud" if fraud else f"; that claim's outcome: {_outcome(ln)}, which does not clear this one")
+    pairs = sorted(ln.reasons & {"surveyor", "doctor"})
+    if fraud and pairs:
+        return "STRONG", f"{C.KIND_LABEL[pairs[0]]} as a claim SIU confirmed as fraud"
+    if fraud and "address" in ln.reasons:
+        return "STRONG", "same address block as a claim SIU confirmed as fraud"
+    shared = ", ".join(sorted(C.KIND_LABEL.get(r, r) for r in ln.reasons if r not in ("timeline", "pattern")))
+    return "WEAK", f"shares only {shared or 'context'}; no personal identifier in common (outcome: {_outcome(ln)})"
+
+
+def _outcome(ln: Link) -> str:
+    if _is_fraud(ln):
+        return "confirmed fraud"
+    j = " ".join(ln.verdict_facts).lower()
+    if "cleared" in j:
+        return "cleared as genuine"
+    if "approved" in j or "paid" in j:
+        return "approved"
+    if "referred" in j:
+        return "referred to SIU"
+    return "none recorded"
+
+
 def heuristic_assessment(claim: dict, ranked: list[tuple[Link, float]]) -> dict:
-    """Used only if every LLM attempt fails, so the investigator is never left empty-handed."""
-    top = sum(s for _, s in ranked[:5])
-    score = int(min(95, 10 + top * 6))
+    """Used only if every model is unreachable, so the investigator is never left empty-handed."""
+    scored = sorted(((ln, evidence_points(ln)) for ln, _ in ranked), key=lambda x: -x[1])
+    score = int(min(95, 12 + 7 * sum(p for _, p in scored[:5])))
     flags = []
-    for ln, s in ranked[:4]:
-        if s < 2:
+    for ln, p in scored[:4]:
+        if p < 3:
             continue
-        flags.append({"title": f"Linked to {ln.claim_id}",
-                      "detail": "Shared: " + ", ".join(sorted(C.KIND_LABEL.get(r, r) for r in ln.reasons)),
-                      "severity": "high" if s >= 4 else "medium", "evidence_claim_ids": [ln.claim_id]})
+        what = ", ".join(sorted(C.KIND_LABEL.get(r, r) for r in ln.reasons if r != "timeline"))
+        outcome = "confirmed fraud" if _is_fraud(ln) else "no fraud finding recorded"
+        flags.append({"title": f"Linked to {ln.claim_id} ({outcome})", "detail": f"Shared: {what}.",
+                      "severity": "high" if p >= 6 else "medium", "evidence_claim_ids": [ln.claim_id]})
     return {"risk_score": score, "band": band_for(score),
-            "headline": "Automatic link analysis (LLM unavailable)",
-            "reasoning": "Score computed from the strength of links Hindsight found to past claims.",
-            "red_flags": flags, "mitigating_factors": [], "next_steps": ["Review linked claims manually."],
+            "headline": "Link analysis only: the language model was unreachable",
+            "reasoning": "Scored from shared personal identifiers and links to confirmed-fraud claims that "
+                         "Hindsight recalled. Shared providers or similar stories alone are not counted.",
+            "red_flags": flags, "mitigating_factors": [], "next_steps": ["Review the linked claims manually."],
             "questions_for_claimant": [], "uncited_ids_removed": 0}
 
 
@@ -212,22 +294,25 @@ def evidence_graph(claim: dict, ranked: list[tuple[Link, float]], repo: C.ClaimR
 class Investigator:
     memory: ClaimMemory
     llm: LLM
+    strict: bool = False  # replay evaluation: never substitute the deterministic fallback
 
     async def assess_stateless(self, claim: dict) -> dict:
         user = f"{_claim_block(claim)}\n\n{NO_HISTORY}"
         data, source = await self.llm.json(SYSTEM, user, validate=make_validator(set()),
-                                           fallback=lambda: stateless_fallback(claim))
+                                           fallback=lambda: stateless_fallback(claim), strict=self.strict)
         data["model"] = source
         return data
 
     async def assess_with_memory(self, claim: dict, *, sink: list[MemoryOp] | None = None,
-                                 exclude: set[str] | None = None) -> tuple[dict, dict]:
-        ev = await gather_evidence(self.memory, claim, sink=sink, exclude=exclude)
+                                 exclude: set[str] | None = None,
+                                 query_time: str | None = None) -> tuple[dict, dict]:
+        ev = await gather_evidence(self.memory, claim, sink=sink, exclude=exclude, query_time=query_time)
         ranked = rank_links(ev["links"])
         user = f"{_claim_block(claim)}\n\n{_history_block(claim, ranked, ev['insights'])}"
         allowed = {ln.claim_id for ln, _ in ranked}
         data, source = await self.llm.json(SYSTEM, user, validate=make_validator(allowed),
-                                           fallback=lambda: heuristic_assessment(claim, ranked))
+                                           fallback=lambda: heuristic_assessment(claim, ranked),
+                                           strict=self.strict)
         data["model"] = source
         ev["ranked"] = ranked
         return data, ev
@@ -236,8 +321,10 @@ class Investigator:
                           retain: bool = True) -> dict[str, Any]:
         """Full intake: both assessments in parallel, then commit the claim to memory."""
         sink: list[MemoryOp] = []
+        now = datetime.now(timezone.utc).isoformat()
+        # Live use: memory is recalled as of now, so outcomes recorded today count.
         (mem_assessment, ev), baseline = await asyncio.gather(
-            self.assess_with_memory(claim, sink=sink),
+            self.assess_with_memory(claim, sink=sink, query_time=now),
             self.assess_stateless(claim),
         )
         if retain:

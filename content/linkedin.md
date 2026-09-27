@@ -33,7 +33,7 @@ Code: [REPO LINK]
 
 We replayed 9 months of insurance claims in date order. Every claim was scored twice by the same model: alone, and with Hindsight memory. Outcomes entered memory only on the day they were decided.
 
-Result: {{RECALL_WITHOUT}} → {{RECALL_WITH}} of fraud claims flagged.
+Aug–Sep: 0 of 12 → 11 of 12 fraud claims flagged. Zero honest claims flagged.
 
 The shape is the point:
 → The first claims of a new ring get missed. Nothing to remember yet.

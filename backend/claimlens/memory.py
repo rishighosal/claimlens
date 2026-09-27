@@ -386,6 +386,7 @@ class Probe:
     max_tokens: int = 1200
     temporal_window: dict | None = None
     min_scores: dict | None = None
+    tags_match: str = "any_strict"
     entity: C.Entity | None = None
 
 
@@ -401,6 +402,14 @@ def plan_probes(claim: dict) -> list[Probe]:
             label=f"Who else has {e.label}?",
             query=f"Past claims and investigator outcomes involving {e.label}",
             tags=[e.tag],
+        ))
+        # Outcomes are what investigators learned. Ask for them explicitly so a
+        # recent verdict is never crowded out by older claim facts.
+        probes.append(Probe(
+            reason=e.kind, entity=e,
+            label=f"What did SIU decide about {e.label}?",
+            query=f"Investigator outcome, repudiation or approval for claims involving {e.label}",
+            tags=["verdict", e.tag], tags_match="all_strict", max_tokens=1000,
         ))
     probes.append(Probe(
         reason="narrative", label="Have we heard this story before?",
@@ -434,9 +443,15 @@ class Link:
 
 
 async def gather_evidence(mem: ClaimMemory, claim: dict, *, sink: list[MemoryOp] | None = None,
-                          exclude: set[str] | None = None, concurrency: int = 6) -> dict:
-    """Run every probe concurrently and fold the results into linked claims."""
+                          exclude: set[str] | None = None, concurrency: int = 6,
+                          query_time: str | None = None) -> dict:
+    """Run every probe concurrently and fold the results into linked claims.
+
+    query_time anchors recency. The replay uses the claim's intimation date (so
+    memory never sees the future); the live app uses "now", so an outcome an
+    investigator recorded a minute ago counts as the most recent knowledge."""
     exclude = (exclude or set()) | {claim["claim_id"]}
+    qt = query_time or C.as_datetime(claim["intimation_date"]).isoformat()
     probes = plan_probes(claim)
     sem = asyncio.Semaphore(concurrency)
 
@@ -445,8 +460,8 @@ async def gather_evidence(mem: ClaimMemory, claim: dict, *, sink: list[MemoryOp]
             try:
                 return p, await mem.recall(
                     p.query, label=p.label, sink=sink, tags=p.tags,
-                    tags_match="any_strict" if p.tags else "any", types=p.types, budget=p.budget,
-                    max_tokens=p.max_tokens, query_timestamp=C.as_datetime(claim["intimation_date"]).isoformat(),
+                    tags_match=p.tags_match if p.tags else "any", types=p.types, budget=p.budget,
+                    max_tokens=p.max_tokens, query_timestamp=qt,
                     temporal_window=p.temporal_window, min_scores=p.min_scores,
                 )
             except Exception:
@@ -473,7 +488,7 @@ async def gather_evidence(mem: ClaimMemory, claim: dict, *, sink: list[MemoryOp]
             ln.reasons.add(p.reason)
             linked_here.add(cid)
             bucket = ln.verdict_facts if (f.get("document_id") or "").startswith("verdict:") else ln.facts
-            if f["text"] not in bucket and len(bucket) < 6:
+            if f["text"] not in bucket and len(bucket) < 4:
                 bucket.append(f["text"])
         probe_summary.append({"reason": p.reason, "label": p.label, "hits": len(facts),
                               "linked_claims": sorted(linked_here),

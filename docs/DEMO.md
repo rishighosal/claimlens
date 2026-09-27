@@ -4,6 +4,8 @@ Target: 3 minutes. The story: *watch the agent get smarter.*
 
 ## Before you start (one time, about 20 minutes)
 
+**Never run the replay evaluation while presenting.** Both share the Groq rate limit. Run the evaluation earlier, or with a teammate's Groq key.
+
 ```bash
 python scripts/seed_memory.py --reset          # loads Jan-Aug history into Hindsight
 python scripts/replay_eval.py --sample 70      # produces the "Does memory help?" page (run once, ~15-30 min)
@@ -27,12 +29,12 @@ uvicorn claimlens.api:app --app-dir backend --port 8000
 | 1:50 | **#10614** (Sri Balaji garage, surveyor T. Lavanya) → Investigate | "Same garage, but a different surveyor, and the other driver's registration is on record. Memory knows six genuine claims at this garage, all with other surveyors, were paid without issue. It doesn't over-flag. Volume isn't fraud; that's one of the bank's directives." |
 | 2:10 | **#10597** (Creta TS08FK4521) → Investigate | "Nobody ever flagged this one. But memory remembers this exact car claiming the exact same front-left damage in February and June, under a different owner." |
 | 2:25 | Memory panel → **Ask memory** → "What do the Lifeline Multispeciality claims have in common?" | "Reflect over the whole bank: weekend admissions, same doctor, policies five weeks old, same agent." |
-| 2:40 | **Does memory help?** tab | "And we measured it: replaying nine months of claims in date order. Same model with and without memory. [read the two recall numbers]. Each ring's first claims are missed, because there's nothing to remember yet. After that, memory catches them." |
+| 2:40 | **Does memory help?** tab | "And we measured it: replaying nine months of claims in date order. Same model with and without memory. Without memory: zero fraud caught, all year. With Hindsight: eleven of twelve in August and September, and not one honest claim flagged. Each ring's first claims are missed, because there's nothing to remember yet. After that, memory catches them." |
 | 2:55 | | "ClaimLens: claims triage that remembers every claim. It recommends; people decide." |
 
 ## If something breaks live
 
-- The LLM is rate-limited: the agent retries, falls back to `qwen/qwen3-32b`, then to a deterministic link-strength score (labelled `fallback`). Keep talking.
+- The LLM is rate-limited: the agent retries, waits out the rate limit, then tries the backup models (`openai/gpt-oss-20b`, `qwen/qwen3.8-27b`), and only then uses a conservative link-analysis score (labelled `fallback`). Keep talking.
 - Hindsight slow: the investigation shows progress steps; recall budget is `low` for the identifier probes.
 - Worst case: the memory panel still shows the recorded retain/recall log from earlier runs, and the eval page is static JSON.
 

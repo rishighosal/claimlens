@@ -61,7 +61,9 @@ def test_every_probe_builds_a_valid_recall_request(real):
     n_probes = sum(len(plan_probes(c)) for c in C.repo().open_queue()[:5])
     assert len(stub.recalls) == n_probes
     strict = [r for r in stub.recalls if r.tags]
-    assert all(r.tags_match == "any_strict" for r in strict)
+    assert all(r.tags_match in ("any_strict", "all_strict") for r in strict)
+    outcome_probes = [r for r in strict if r.tags_match == "all_strict"]
+    assert outcome_probes and all("verdict" in r.tags and len(r.tags) == 2 for r in outcome_probes)
     assert any(r.min_scores is not None for r in stub.recalls)
     assert any(r.temporal_window is not None for r in stub.recalls)
     assert any(r.types == ["observation"] for r in stub.recalls)

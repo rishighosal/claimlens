@@ -10,3 +10,7 @@ data/*.tmp
 data/eval/run_state.json
 data/eval/scores.jsonl
 .DS_Store
+
+.venv/
+venv/
+frontend/tsconfig.tsbuildinfo

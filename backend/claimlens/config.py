@@ -35,7 +35,10 @@ class Settings:
     llm_base_url: str = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
     llm_api_key: str | None = os.getenv("LLM_API_KEY") or os.getenv("GROQ_API_KEY") or None
     llm_model: str = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
-    llm_fallback_model: str = os.getenv("LLM_FALLBACK_MODEL", "qwen/qwen3-32b")
+    # Comma-separated backups, tried in order when the primary is unavailable
+    llm_fallback_model: str = os.getenv("LLM_FALLBACK_MODEL", "openai/gpt-oss-20b,qwen/qwen3.8-27b")
+    # How long to keep waiting out rate limits (429) before moving on
+    llm_rate_limit_wait: float = float(os.getenv("LLM_RATE_LIMIT_WAIT", "60"))
     fake_llm: bool = _bool("CLAIMLENS_FAKE_LLM")
 
     # Minimum cross-encoder relevance (0-1) for a "similar story" link
