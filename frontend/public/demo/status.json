@@ -1,0 +1,1 @@
+{"memory_backend":"hindsight","hindsight_reachable":true,"bank_id":"claimlens-siu","llm_model":"openai/gpt-oss-120b","llm_usage":{"calls":8,"prompt_tokens":17868,"completion_tokens":3010,"failures":0},"memory_stats":{"bank_id":"claimlens-siu","world":2156,"experience":15,"observation":1680},"history_claims":189,"queue_claims":26,"recorded_at":"28 Sep 2026"}
