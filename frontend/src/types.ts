@@ -125,4 +125,6 @@ export interface Status {
   memory_stats: Record<string, number | null | string>;
   history_claims: number;
   queue_claims: number;
+  recorded?: boolean;
+  recorded_at?: string;
 }

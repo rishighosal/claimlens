@@ -43,6 +43,17 @@ Talk track, deck and judge Q&A: [PITCH.md](PITCH.md).
 - Hindsight slow: the investigation shows progress steps; recall budget is `low` for the identifier probes.
 - Worst case: the memory panel still shows the recorded retain/recall log from earlier runs, and the eval page is static JSON.
 
+## Publish the recorded demo site (after recording)
+
+With the server still running and the four demo claims done (#10595 investigated + **Confirm fraud** + briefing, then #10606, #10614, #10597):
+
+```bash
+python scripts/export_demo.py        # writes frontend/public/demo/ (~1 MB, no keys)
+git add frontend/public/demo && git commit -m "Recorded demo" && git push
+```
+
+The `demo-site` workflow builds the same UI in replay mode and publishes it to GitHub Pages. Anyone can click through the guided demo; claims that weren't part of the recording say so.
+
 ## Screenshots to capture for the article
 1. Compare cards on #10595 (without vs with)
 2. Evidence graph on #10595 or #10606

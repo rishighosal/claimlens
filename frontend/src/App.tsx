@@ -102,14 +102,29 @@ export default function App() {
               <b>{reviewed}</b>/{rows.length} reviewed · <b className="red">{flagged}</b> referred
             </span>
           )}
-          <span className={`conn ${status?.memory_backend === "hindsight" ? (status.hindsight_reachable ? "ok" : "bad") : "dev"}`}>
-            {status?.memory_backend === "hindsight"
-              ? status.hindsight_reachable ? "Hindsight connected" : "Hindsight unreachable"
-              : "Offline stand-in"}
-          </span>
+          {status?.recorded ? (
+            <span className="conn rec" title={`Recorded ${status.recorded_at ?? ""} from a live run on Hindsight Cloud`}>
+              Recorded run
+            </span>
+          ) : (
+            <span className={`conn ${status?.memory_backend === "hindsight" ? (status.hindsight_reachable ? "ok" : "bad") : "dev"}`}>
+              {status?.memory_backend === "hindsight"
+                ? status.hindsight_reachable ? "Hindsight connected" : "Hindsight unreachable"
+                : "Offline stand-in"}
+            </span>
+          )}
         </div>
       </header>
-      {status?.memory_backend === "offline-standin" && (
+      {status?.recorded && (
+        <div className="banner rec">
+          <b>Recorded demo.</b> Every score, recall and briefing here is real output from a live run on Hindsight Cloud
+          {status.llm_model ? <> with <code>{status.llm_model}</code></> : null}
+          {status.recorded_at ? <>, recorded {status.recorded_at}</> : null}. The site replays it so no API keys are
+          exposed. To run it live:{" "}
+          <a href="https://github.com/rishighosal/claimlens" target="_blank" rel="noreferrer">github.com/rishighosal/claimlens</a>
+        </div>
+      )}
+      {!status?.recorded && status?.memory_backend === "offline-standin" && (
         <div className="banner warn">
           Offline development mode: memory is a naive in-process stand-in, not Hindsight. Set HINDSIGHT_API_KEY and
           unset CLAIMLENS_FAKE_MEMORY for the real system.

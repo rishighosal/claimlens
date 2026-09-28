@@ -41,6 +41,7 @@ Hindsight Cloud (hindsight-client 0.10) · Groq `openai/gpt-oss-120b` (backups: 
 ## Links
 - GitHub: https://github.com/rishighosal/claimlens
 - Demo video (YouTube): …
+- Try it in the browser (recorded run, no install): https://rishighosal.github.io/claimlens/
 - Articles, one per member: …
 - LinkedIn posts, one per member: …
 
@@ -51,6 +52,7 @@ Hindsight Cloud (hindsight-client 0.10) · Groq `openai/gpt-oss-120b` (backups: 
 **Repo**
 - [ ] Public; README shows the learning curve and architecture images; CI badge is green
 - [ ] Video link added to the README (the `DEMO-VIDEO` comment line near the top)
+- [ ] Demo site live at https://rishighosal.github.io/claimlens/ and linked in the README (the `DEMO-SITE` comment line)
 - [ ] No `.env`, no `.venv` in the repo
 
 **Video (one per team)**

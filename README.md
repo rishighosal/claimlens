@@ -8,6 +8,7 @@
 ![license](https://img.shields.io/badge/license-MIT-15803d)
 
 <!-- DEMO-VIDEO: replace this comment with:  **[▶ Watch the 3-minute demo](https://youtu.be/...)** -->
+<!-- DEMO-SITE: replace this comment with:  **[Try the recorded demo in your browser](https://rishighosal.github.io/claimlens/)** (real results from a live run; no install) -->
 
 Organised insurance fraud is invisible one claim at a time. A staged "unknown vehicle hit me from behind" at a Moosapet garage looks exactly like a genuine accident. It stops looking genuine once you notice that the same surveyor handled ten others like it, two "unrelated" claimants share a phone number, and the payee bank account is on a claim that investigators already repudiated.
 
