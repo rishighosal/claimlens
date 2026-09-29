@@ -1,6 +1,6 @@
 # Content kit
 
-Everything here follows the content guide. Hard rule: **the word "hackathon" must not appear in any article, post, title, hashtag or video title.** Check with Ctrl+F before publishing.
+Everything here follows the content guide. Hard rule: **the word "the event name" must not appear in any article, post, title, hashtag or video title.** Check with Ctrl+F before publishing.
 
 Each team member publishes **their own** article (800–1,500 words) and LinkedIn post. The team publishes **one** YouTube video (2–5 min).
 

@@ -58,14 +58,14 @@ Hindsight Cloud (hindsight-client 0.10) · Groq `openai/gpt-oss-120b` (backups: 
 **Video (one per team)**
 - [ ] 2–5 min, 1080p, public on YouTube, custom thumbnail
 - [ ] Shows: the problem, without vs with memory, confirm fraud → next claim learns, the honest claim staying low, the learning curve
-- [ ] Title and description don't contain the word "hackathon"
+- [ ] Title and description don't contain the word "the event name"
 
 **Content (every member)**
 - [ ] Article (800–1,500 words) public on Medium / Dev.to / Hashnode / LinkedIn Articles
 - [ ] Links in the article: github.com/vectorize-io/hindsight, hindsight.vectorize.io, vectorize.io/what-is-agent-memory
 - [ ] Article shared as a Reddit link post (r/LLMDevs, r/SideProject, r/AI_Agents or r/aimemory)
 - [ ] LinkedIn post with the repo link in the body; first comment = article link; comment with the Hindsight repo link
-- [ ] Ctrl+F "hackathon" in every article, post and hashtag: must be zero
+- [ ] Ctrl+F "the event name" in every article, post and hashtag: must be zero
 
 **Team**
 - [ ] Every member completed the Profile Review Form
